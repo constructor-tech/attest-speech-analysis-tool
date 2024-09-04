@@ -1,0 +1,70 @@
+# ATTEST: an Analytics Tool for the Testing and Evaluation of Speech Technologies
+#
+# Copyright (C) 2024 Constructor Technology AG
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see: <http://www.gnu.org/licenses/>.
+#
+
+logging:
+  level: "INFO"
+
+directories:
+  data_dir: "egs"
+  cache_dir: "cache"
+  models_dir: "models"
+  third_party_dir: "attest/third_party"
+
+device: "cuda"
+
+feature_params:
+  pitch_extraction_method: "pyworld" # one of  "pyworld", "torchcrepe-tiny", or "torchcrepe-full"
+  text_normalization_method: "None" # one of "None", or "Nemo" (if installed)
+
+models:
+  wavlm:
+    model_name: "microsoft/wavlm-large"
+  whisper:
+    model_name: "base"
+    use_fp16: false
+
+default_view_preferences:
+  features:
+    audio: true
+    text: true
+    text_norm: false
+    transcript: false
+    text_phonemes: false
+    transcript_phonemes: false
+    character_distance: false
+    phoneme_distance: false
+    utmos: false
+    squim_stoi: false
+    squim_pesq: false
+    squim_sisdr: false
+    pronunciation_speed: false
+    pronunciation_speed_phonemes: false
+    audio_duration: false
+    speech_duration: false
+    silence_begin: false
+    silence_end: false
+    pitch_mean: false
+    pitch_std: false
+    pitch_plot: false
+    wavelet_prosody: false
+    vde: false
+    gpe: false
+    ffe: false
+    logf0_rmse: false
+    sim_ecapa: false
+    speech_bert_score: false

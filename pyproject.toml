@@ -1,0 +1,13 @@
+[tool.black]
+line-length = 120
+target-version = ['py310']
+exclude = '''
+/(
+    \.git
+  | attest/third_party
+  | cache
+  | egs
+  | models
+  | venv
+)/
+'''
