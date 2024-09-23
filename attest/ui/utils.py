@@ -19,7 +19,6 @@
 import logging
 import os
 from attest.ui.settings import get_settings
-from attest.ui.view_constants import EMPTY_GROUP_LABEL
 
 
 _logger = None
@@ -38,20 +37,31 @@ def get_logger():
     return _logger
 
 
-def get_list_of_projects(group):
-    settings = get_settings()
+def check_if_group(path):
+    num_projects = len(get_list_of_projects(path))
+    return num_projects > 0
 
-    if group == EMPTY_GROUP_LABEL:
-        data_dir = settings.DATA_DIR
-    else:
-        data_dir = f"{settings.DATA_DIR}/{group}"
 
-    return sorted_list_of_folder_names(data_dir)
+def check_if_project(path):
+    file_path = f"{path}/meta/filelist.txt"
+    return os.path.exists(file_path)
+
+
+def get_list_of_groups(path):
+    return [x for x in os.listdir(path) if check_if_group(f"{path}/{x}")]
+
+
+def get_list_of_projects(path):
+    return [x for x in os.listdir(path) if check_if_project(f"{path}/{x}")]
 
 
 def get_list_of_pitch_extract_methods():
     methods = ["pyworld", "torchcrepe-tiny", "torchcrepe-full"]
     return methods
+
+
+def resolve_group_path(data_dir, group=None):
+    return f"{data_dir}/{group}" if group else data_dir
 
 
 def get_list_of_text_norm_methods():
@@ -63,7 +73,3 @@ def get_list_of_text_norm_methods():
     except ImportError:
         pass
     return methods
-
-
-def sorted_list_of_folder_names(path):
-    return sorted([x for x in os.listdir(path) if os.path.isdir(f"{path}/{x}")])

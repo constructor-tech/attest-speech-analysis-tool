@@ -34,9 +34,12 @@ from attest.ui.model import (
 )
 from attest.ui.settings import get_settings
 from attest.ui.utils import (
+    check_if_group,
+    get_list_of_groups,
     get_list_of_projects,
     get_list_of_pitch_extract_methods,
     get_list_of_text_norm_methods,
+    resolve_group_path,
 )
 from attest.ui.view_utils import (
     convert_to_dataframe,
@@ -220,23 +223,46 @@ class View:
 
     def display_group_and_project_subsection(self):
         st.write(vc.GROUP_AND_PROJECT_LABEL)
+        selected_group = st.session_state.selected_group
+        selected_method = st.session_state.selected_method
 
-        group_values = [vc.EMPTY_GROUP_LABEL, *os.listdir(self.settings.DATA_DIR)]
-        group_default_index = group_values.index(st.session_state.selected_group)
+        # Display groups
+        group_identifiers = []
+
+        if check_if_group(self.settings.DATA_DIR):
+            group_identifiers.append(vc.EMPTY_GROUP_LABEL)
+
+        list_of_groups = get_list_of_groups(self.settings.DATA_DIR)
+
+        group_identifiers.extend(list_of_groups)
+
+        group_index = 0 
+        if selected_group in group_identifiers:
+            group_index = group_identifiers.index(selected_group)
+        elif len(group_identifiers) > 0:
+            selected_group = group_identifiers[group_index]
+            st.session_state.selected_group = group_identifiers[group_index]
+
         st.selectbox(
             vc.GROUP_LABEL,
-            group_values,
-            index=group_default_index,
+            group_identifiers,
+            index=group_index,
             key="selected_group",
         )
 
-        list_of_projects = get_list_of_projects(st.session_state.selected_group)
+        # Display projects
+        if selected_group == vc.EMPTY_GROUP_LABEL:
+            selected_group = None
+        
+        group_path = resolve_group_path(self.settings.DATA_DIR, selected_group)
+        
+        list_of_projects = sorted(get_list_of_projects(group_path))
 
-        if st.session_state.selected_method == vc.EVALUATE_METHOD:
+        if selected_method == vc.EVALUATE_METHOD:
             st.session_state.selected_num_projects = 1
             self.projects = [st.selectbox(vc.PROJECT_LABEL, list_of_projects, key="selected_project_0")]
 
-        elif st.session_state.selected_method == vc.COMPARE_METHOD:
+        elif selected_method == vc.COMPARE_METHOD:
             st.session_state.selected_num_projects = 2
             second_index = min(1, len(list_of_projects) - 1)
             self.projects = [
@@ -249,7 +275,7 @@ class View:
                 ),
             ]
 
-        elif st.session_state.selected_method == vc.COMPARE_MULTIPLE_METHOD:
+        elif selected_method == vc.COMPARE_MULTIPLE_METHOD:
             self.settings.NUM_PROJECTS_TO_COMPARE = st.text_input(
                 vc.NUM_PROJECTS_FOR_MULTIPLE_COMPARE_LABEL,
                 value=self.settings.NUM_PROJECTS_TO_COMPARE,
