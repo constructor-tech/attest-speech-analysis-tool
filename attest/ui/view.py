@@ -236,7 +236,7 @@ class View:
 
         group_identifiers.extend(list_of_groups)
 
-        group_index = 0 
+        group_index = 0
         if selected_group in group_identifiers:
             group_index = group_identifiers.index(selected_group)
         elif len(group_identifiers) > 0:
@@ -253,9 +253,9 @@ class View:
         # Display projects
         if selected_group == vc.EMPTY_GROUP_LABEL:
             selected_group = None
-        
+
         group_path = resolve_group_path(self.settings.DATA_DIR, selected_group)
-        
+
         list_of_projects = sorted(get_list_of_projects(group_path))
 
         if selected_method == vc.EVALUATE_METHOD:
@@ -652,19 +652,19 @@ class View:
                     container.audio(feature.audio_path)
                 else:
                     container.write(not_found_message)
-            
+
             if feature.image_path:
                 if os.path.exists(feature.image_path):
                     image = Image.open(feature.image_path)
                     container.image(image, caption=feature.image_path)
                 else:
                     container.write(not_found_message)
-            
+
             if feature.video_path:
                 if os.path.exists(feature.video_path):
                     container.video(feature.video_path)
                 else:
                     container.write(not_found_message)
-            
+
             if feature.plot_data:
                 display_plot(container, feature.plot_data, figsize=(8, 5), fontsize=6)
