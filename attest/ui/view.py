@@ -141,7 +141,7 @@ class View:
         self.display_view_configuration()
 
     def display_error(self, msg):
-        st.write(msg)
+        st.error(f"⚠️ {vc.ERROR_LABEL}: {msg}")
 
     def display_sidebar(self):
         if st.session_state.tab != vc.HOME_TAB:
@@ -643,13 +643,28 @@ class View:
         else:
             # attribute
             if feature.message:
-                container.write("*%s*: %s" % (feature_label.upper(), feature.message))
+                container.write(f"*{feature_label.upper()}*: {feature.message}")
+
+            not_found_message = f"**{vc.WARNING_LABEL}**: {feature_label} {vc.NOT_FOUND_MESSAGE}"
+
             if feature.audio_path:
-                container.audio(feature.audio_path)
+                if os.path.exists(feature.audio_path):
+                    container.audio(feature.audio_path)
+                else:
+                    container.write(not_found_message)
+            
             if feature.image_path:
-                image = Image.open(feature.image_path)
-                container.image(image, caption=feature.image_path)
+                if os.path.exists(feature.image_path):
+                    image = Image.open(feature.image_path)
+                    container.image(image, caption=feature.image_path)
+                else:
+                    container.write(not_found_message)
+            
             if feature.video_path:
-                container.video(feature.video_path)
+                if os.path.exists(feature.video_path):
+                    container.video(feature.video_path)
+                else:
+                    container.write(not_found_message)
+            
             if feature.plot_data:
                 display_plot(container, feature.plot_data, figsize=(8, 5), fontsize=6)

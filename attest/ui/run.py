@@ -118,35 +118,39 @@ if __name__ == "__main__":
     project_updated = st.session_state.project_id != current_project_id or has_new_features or has_new_feature_params
 
     if project_updated and st.session_state.tab == vc.HOME_TAB:
+        try:
+            if st.session_state.method == vc.EVALUATE_METHOD:
+                st.session_state.result = evaluate(
+                    project=projects[0],
+                    features=settings.FEATURES,
+                    feature_params=feature_params,
+                )
+                st.session_state.parsed_result = UIEvaluationResult.parse(st.session_state.result)
 
-        if st.session_state.method == vc.EVALUATE_METHOD:
-            st.session_state.result = evaluate(
-                project=projects[0],
-                features=settings.FEATURES,
-                feature_params=feature_params,
-            )
-            st.session_state.parsed_result = UIEvaluationResult.parse(st.session_state.result)
+            elif st.session_state.method == vc.COMPARE_METHOD:
+                st.session_state.result = compare(
+                    project1=projects[0],
+                    project2=projects[1],
+                    features=settings.FEATURES,
+                    feature_params=feature_params,
+                )
+                st.session_state.parsed_result = UIComparisonResult.parse(st.session_state.result)
 
-        elif st.session_state.method == vc.COMPARE_METHOD:
-            st.session_state.result = compare(
-                project1=projects[0],
-                project2=projects[1],
-                features=settings.FEATURES,
-                feature_params=feature_params,
-            )
-            st.session_state.parsed_result = UIComparisonResult.parse(st.session_state.result)
+            elif st.session_state.method == vc.COMPARE_MULTIPLE_METHOD:
+                st.session_state.result = multiple_compare(
+                    projects=projects,
+                    features=settings.FEATURES,
+                    feature_params=feature_params,
+                )
+                st.session_state.parsed_result = UIMultipleComparisonResult.parse(st.session_state.result)
 
-        elif st.session_state.method == vc.COMPARE_MULTIPLE_METHOD:
-            st.session_state.result = multiple_compare(
-                projects=projects,
-                features=settings.FEATURES,
-                feature_params=feature_params,
-            )
-            st.session_state.parsed_result = UIMultipleComparisonResult.parse(st.session_state.result)
+            st.session_state.project_id = current_project_id
+            st.session_state.features = settings.FEATURES
+            st.session_state.feature_params = feature_params
 
-        st.session_state.project_id = current_project_id
-        st.session_state.features = settings.FEATURES
-        st.session_state.feature_params = feature_params
+        except FileNotFoundError as e:
+            error_msg = vc.FILE_NOT_FOUND(e)
+            st.session_state.parsed_result = UIErrorResult(error_msg)
 
     if st.session_state.tab == vc.SETTINGS_TAB:
         view.display_settings()

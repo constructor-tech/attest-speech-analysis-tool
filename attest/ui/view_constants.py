@@ -76,3 +76,8 @@ SUMMARY_LABEL = "Summary"
 COMPARISON_PLOTS_LABEL = "Graphs with metrics"
 COMPARISON_PLOTS_LABEL_X = "Project"
 COMPARISON_PLOTS_LABEL_Y = "Values"
+
+ERROR_LABEL = "ERROR"
+WARNING_LABEL = "WARNING"
+NOT_FOUND_MESSAGE = "Not Found"
+FILE_NOT_FOUND = lambda e: f"File not found: {e}. Please make sure the file exists and the path is correct."  # noqa: E731
