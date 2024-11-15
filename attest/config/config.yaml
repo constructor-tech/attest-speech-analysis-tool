@@ -46,6 +46,9 @@ default_view_preferences:
     transcript: false
     text_phonemes: false
     transcript_phonemes: false
+    cer: false
+    wer: false
+    per: false
     character_distance: false
     phoneme_distance: false
     utmos: false

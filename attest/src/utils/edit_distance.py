@@ -40,7 +40,7 @@ def edit_distance_many(seqs1, seqs2):
     return [edit_distance(seq1, seq2) for seq1, seq2 in zip(seqs1, seqs2)]
 
 
-def format_text_for_edit_distance(text, remove_tags=True):
+def format_text_for_edit_distance(text, remove_tags=True, remove_spaces=True):
     # lowercase
     text = text.lower()
 
@@ -81,8 +81,12 @@ def format_text_for_edit_distance(text, remove_tags=True):
                 text_no_tags.append(c)
         text = "".join(text_no_tags)
 
-    # remove punctuation and spaces:
-    for c in "!?:;.,\"-'()[] ":
+    # remove punctuation
+    for c in "!?:;.,\"-'()[]":
         text = text.replace(c, "")
+
+    # remove spaces
+    if remove_spaces:
+        text = text.replace(" ", "")
 
     return text

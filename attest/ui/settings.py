@@ -137,6 +137,9 @@ class Settings(BaseModel):
         (
             "Speech Intelligibility",
             [
+                ("CER", "cer", MetricType.METRIC, "↓"),
+                ("WER", "wer", MetricType.METRIC, "↓"),
+                ("PER", "per", MetricType.METRIC, "↓"),
                 ("Character distance", "character_distance", MetricType.METRIC, "↓"),
                 ("Phoneme distance", "phoneme_distance", MetricType.METRIC, "↓"),
             ],

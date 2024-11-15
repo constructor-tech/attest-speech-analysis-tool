@@ -18,6 +18,7 @@
 
 import numpy as np
 from statistics import mean
+from torchmetrics.text import CharErrorRate, WordErrorRate
 
 from attest.src.model import Project, MetricResultEntry, MetricResult
 from attest.src.settings import get_settings
@@ -37,6 +38,66 @@ from attest.src.utils.pitch_extractor import get_pitch_extractor
 from attest.src.utils.text_normalizer import get_text_normalizer
 from attest.src.utils.squim import get_squim
 from attest.src.utils.utmos import get_utmos_strong
+
+
+def cer(project: Project) -> MetricResult:
+    asr = get_whisper()
+    metric = CharErrorRate()
+    transcriptions = asr.transcribe_project(project)
+
+    text_normalizer = get_text_normalizer()
+    texts_norm = text_normalizer.normalize_project(project)
+
+    texts_for_cer = [format_text_for_edit_distance(x) for x in texts_norm]
+    transcriptions_for_cer = [format_text_for_edit_distance(x) for x in transcriptions]
+
+    result = [metric(seq1, seq2).item() for seq1, seq2 in zip(transcriptions_for_cer, texts_for_cer)]
+    overall = mean(result)
+    detailed = [MetricResultEntry(uid, score) for uid, score in zip(project.uids, result)]
+    return MetricResult(overall=overall, detailed=detailed)
+
+
+def wer(project: Project) -> MetricResult:
+    asr = get_whisper()
+    metric = WordErrorRate()
+    transcriptions = asr.transcribe_project(project)
+
+    text_normalizer = get_text_normalizer()
+    texts_norm = text_normalizer.normalize_project(project)
+
+    texts_for_cer = [format_text_for_edit_distance(x, remove_spaces=False) for x in texts_norm]
+    transcriptions_for_cer = [format_text_for_edit_distance(x, remove_spaces=False) for x in transcriptions]
+
+    result = [metric(seq1, seq2).item() for seq1, seq2 in zip(transcriptions_for_cer, texts_for_cer)]
+    overall = mean(result)
+    detailed = [MetricResultEntry(uid, score) for uid, score in zip(project.uids, result)]
+    return MetricResult(overall=overall, detailed=detailed)
+
+
+def per(project: Project) -> MetricResult:
+    settings = get_settings()
+    asr = get_whisper()
+    metric = CharErrorRate()
+    text_normalizer = get_text_normalizer()
+    phonemizer = get_phonemizer()
+
+    transcriptions = asr.transcribe_project(project)
+    transcriptions_phonemes = phonemizer.phonemize_many(
+        transcriptions, f"{project.name}/g2p/phonemes-{settings.WHISPER_MODEL_NAME}.txt"
+    )
+
+    texts_norm = text_normalizer.normalize_project(project)
+    texts_phonemes = phonemizer.phonemize_many(
+        texts_norm, f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}.txt"
+    )
+
+    texts_for_cer = [format_text_for_edit_distance(x) for x in texts_phonemes]
+    transcriptions_for_cer = [format_text_for_edit_distance(x) for x in transcriptions_phonemes]
+
+    result = [metric(seq1, seq2).item() for seq1, seq2 in zip(transcriptions_for_cer, texts_for_cer)]
+    overall = mean(result)
+    detailed = [MetricResultEntry(uid, score) for uid, score in zip(project.uids, result)]
+    return MetricResult(overall=overall, detailed=detailed)
 
 
 def character_distance(project: Project) -> MetricResult:

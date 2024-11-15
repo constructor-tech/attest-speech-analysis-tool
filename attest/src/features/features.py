@@ -39,6 +39,9 @@ from .attributes import (
 )
 
 from .metrics import (
+    cer,
+    wer,
+    per,
     character_distance,
     phoneme_distance,
     pronunciation_speed,
@@ -81,6 +84,9 @@ _attribute_id_to_method = {
 }
 
 _metric_id_to_method = {
+    "cer": cer,
+    "wer": wer,
+    "per": per,
     "character_distance": character_distance,
     "phoneme_distance": phoneme_distance,
     "pronunciation_speed": pronunciation_speed,

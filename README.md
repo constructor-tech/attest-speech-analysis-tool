@@ -4,7 +4,7 @@
 
 **ATTEST** is a powerful evaluation framework designed to streamline the analysis of (synthesized) speech by integrating a variety of metrics across multiple dimensions. It consolidates speech evaluation into five distinct categories, each equipped with a set of metrics to thoroughly assess various aspects of speech quality:
 
-- **Speech Intelligibility**: Focuses on how accurately a TTS model reproduces the intended text, emphasizing the clarity with which spoken words are understood. The primary metrics used include the character/phoneme error rate.
+- **Speech Intelligibility**: Focuses on how accurately a TTS model reproduces the intended text, emphasizing the clarity with which spoken words are understood. The primary metrics used include CER (Character Error Rate), WER (Word Error Rate), and PER (Phoneme Error Rate).
 - **Speech Prosody**: Assesses the naturalness and expressiveness of speech prosody, using pitch analysis metrics such as voicing decision error (VDE), gross pitch error (GPE), fine pitch error (FFE), and logarithmic frequency root mean square error (Log F0 RMSE).
 - **Speaker Similarity**: Measures how closely the synthesized voice matches the target speaker, crucial for applications like voice cloning. Metrics for this include speaker similarity based on a comparison of embeddings obtained using the ECAPA-TDNN speaker verification model.
 - **Signal Quality**: Analyzes the overall audio quality and intelligibility of the speech signal with metrics like PESQ, STOI, and TorchAudio-Squim.
@@ -55,7 +55,7 @@ If you encounter issues with installing PyTorch, please refer to the official [P
 
 ### Extra Packages
 
-1. **Nemo Text Normalization for Character Distance, and Phoneme Distance**: Install `nemo-text-processing==0.2.2rc0`. By default, text normalization is not performed to calculate to compute character and phoneme distance. If you encounter issues on MacOS or Windows, refer to the [official installation guide](https://github.com/NVIDIA/NeMo-text-processing?tab=readme-ov-file#installation).
+1. **Nemo Text Normalization for CER, WER, PER, Character Distance, and Phoneme Distance**: Install `nemo-text-processing==0.2.2rc0`. By default, text normalization is not performed to compute metrics that rely on text comparison. If you encounter issues on MacOS or Windows, refer to the [official installation guide](https://github.com/NVIDIA/NeMo-text-processing?tab=readme-ov-file#installation).
 
 
 ## Getting Started
@@ -115,8 +115,11 @@ Below is a list of the metrics available in ATTEST. Each metric also has an iden
 
 2. **Speech intelligibility**
 
-    - **Character distance** *(CLI Identifier: `character_distance`, GPU preferred)*: The number of distinct symbols between the original text and the transcription obtained from ASR.
-    - **Phoneme distance** *(CLI Identifier: `phoneme_distance`, GPU preferred)*: The number of distinct phonemes between the original text and the transcription obtained from ASR.
+    - **CER (Character Error Rate)** (CLI Identifier: `cer`, GPU preferred): The percentage of characters that were incorrectly predicted by the Whisper speech recognition model compared to the original text.
+    - **WER (Word Error Rate)** (CLI Identifier: `wer`, GPU preferred): The percentage of words that were incorrectly predicted by the Whisper speech recognition model compared to the original text.
+    - **PER (Phoneme Error Rate)** (CLI Identifier: `per`, GPU preferred): The percentage of phonemes that were incorrectly predicted, calculated by using the Whisper speech recognition model and grapheme-to-phoneme (G2P) conversion to compare the phonemes of the original text and the transcription.
+    - **Character distance** *(CLI Identifier: `character_distance`, GPU preferred)*: The number of distinct symbols between the original text and the transcription obtained from Whisper speech recognition model.
+    - **Phoneme distance** *(CLI Identifier: `phoneme_distance`, GPU preferred)*: The number of distinct phonemes between the original text and the transcription obtained from Whisper speech recognition model.
 
 3. **Speech intonation**
 
