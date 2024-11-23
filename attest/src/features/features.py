@@ -24,101 +24,34 @@ from attest.src.model import Project, AttributeResult, MetricResult
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import (
     validate_feature_from_cache,
-    validate_pairwise_feature_from_cache,
+    validate_reference_aware_feature_from_cache,
 )
 from attest.src.utils.logger import get_logger
-from .attributes import (
-    audio,
-    text,
-    text_norm,
-    text_phonemes,
-    transcript,
-    transcript_phonemes,
-    pitch_plot,
-    wavelet_prosody,
-)
-
-from .metrics import (
-    cer,
-    wer,
-    per,
-    character_distance,
-    phoneme_distance,
-    pronunciation_speed,
-    pronunciation_speed_phonemes,
-    audio_duration,
-    speech_duration,
-    silence_begin,
-    silence_end,
-    pitch_mean,
-    pitch_std,
-    utmos,
-    squim_stoi,
-    squim_pesq,
-    squim_sisdr,
-)
-
-from .pairwise_metrics import (
-    vde,
-    gpe,
-    ffe,
-    logf0_rmse,
-    sim_ecapa,
-    speech_bert_score,
-)
+from .attributes import get_attribute_id_to_method
+from .metrics import get_metric_id_to_method
+from .reference_aware_metrics import get_reference_aware_metric_id_to_method
 
 
 logger = get_logger()
 settings = get_settings()
 
 
-_attribute_id_to_method = {
-    "audio": audio,
-    "text": text,
-    "text_norm": text_norm,
-    "text_phonemes": text_phonemes,
-    "transcript": transcript,
-    "transcript_phonemes": transcript_phonemes,
-    "pitch_plot": pitch_plot,
-    "wavelet_prosody": wavelet_prosody,
-}
-
+_attribute_id_to_method = get_attribute_id_to_method()
+_reference_aware_metric_id_to_method = get_reference_aware_metric_id_to_method()
+_non_reference_aware_metric_id_to_method = get_metric_id_to_method()
 _metric_id_to_method = {
-    "cer": cer,
-    "wer": wer,
-    "per": per,
-    "character_distance": character_distance,
-    "phoneme_distance": phoneme_distance,
-    "pronunciation_speed": pronunciation_speed,
-    "pronunciation_speed_phonemes": pronunciation_speed_phonemes,
-    "audio_duration": audio_duration,
-    "speech_duration": speech_duration,
-    "silence_begin": silence_begin,
-    "silence_end": silence_end,
-    "pitch_mean": pitch_mean,
-    "pitch_std": pitch_std,
-    "utmos": utmos,
-    "squim_stoi": squim_stoi,
-    "squim_pesq": squim_pesq,
-    "squim_sisdr": squim_sisdr,
+    **_reference_aware_metric_id_to_method,
+    **_non_reference_aware_metric_id_to_method,
 }
-
-_pairwise_metric_id_to_method = {
-    "vde": vde,
-    "gpe": gpe,
-    "ffe": ffe,
-    "logf0_rmse": logf0_rmse,
-    "sim_ecapa": sim_ecapa,
-    "speech_bert_score": speech_bert_score,
+_reference_aware_feature_id_to_method = _reference_aware_metric_id_to_method
+_non_reference_aware_feature_id_to_method = {
+    **_attribute_id_to_method,
+    **_non_reference_aware_metric_id_to_method,
 }
-
 _feature_id_to_method = {
     **_attribute_id_to_method,
-    **_metric_id_to_method,
-}
-
-_pairwise_feature_id_to_method = {
-    **_pairwise_metric_id_to_method,
+    **_reference_aware_metric_id_to_method,
+    **_non_reference_aware_metric_id_to_method,
 }
 
 
@@ -127,21 +60,27 @@ def is_attribute(feature_id: str) -> bool:
 
 
 def is_metric(feature_id: str) -> bool:
-    # TODO: bad name, is_pairwise_metric is also metrics
     return feature_id in _metric_id_to_method
 
 
-def is_pairwise_metric(feature_id: str) -> bool:
-    return feature_id in _pairwise_metric_id_to_method
+def is_reference_aware_metric(feature_id: str) -> bool:
+    return feature_id in _reference_aware_metric_id_to_method
+
+
+def is_non_reference_aware_metric(feature_id: str) -> bool:
+    return feature_id in _non_reference_aware_metric_id_to_method
 
 
 def is_feature(feature_id: str) -> bool:
-    # TODO: bad name, pairwise_feature is also feature
     return feature_id in _feature_id_to_method
 
 
-def is_pairwise_feature(feature_id: str) -> bool:
-    return feature_id in _pairwise_feature_id_to_method
+def is_reference_aware_feature(feature_id: str) -> bool:
+    return feature_id in _reference_aware_feature_id_to_method
+
+
+def is_non_reference_aware_feature(feature_id: str) -> bool:
+    return feature_id in _non_reference_aware_feature_id_to_method
 
 
 @CacheHandler(
@@ -149,11 +88,11 @@ def is_pairwise_feature(feature_id: str) -> bool:
     method="pickle",
     validator=validate_feature_from_cache,
 )
-def compute_feature(feature_id: str, project: Project, cache_filename: str) -> Union[AttributeResult, MetricResult]:
+def compute_non_reference_aware_feature(feature_id: str, project: Project, cache_filename: str) -> Union[AttributeResult, MetricResult]:
     logger.info('Computing feature "%s" for project "%s"...' % (feature_id, project.name))
 
     start_time = time.time()
-    feature = _feature_id_to_method.get(feature_id)
+    feature = _non_reference_aware_feature_id_to_method.get(feature_id)
     if feature is None:
         logger.info('Unknown feature "%s", skipping.' % feature_id)
         return None
@@ -168,9 +107,9 @@ def compute_feature(feature_id: str, project: Project, cache_filename: str) -> U
 @CacheHandler(
     cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/features2/${{2.name}}/${{3}}.pickle",
     method="pickle",
-    validator=validate_pairwise_feature_from_cache,
+    validator=validate_reference_aware_feature_from_cache,
 )
-def compute_pairwise_feature(
+def compute_reference_aware_feature(
     feature_id: str, hyp_project: Project, ref_project: Project, cache_filename: str
 ) -> Union[AttributeResult, MetricResult]:
     logger.info(
@@ -179,7 +118,7 @@ def compute_pairwise_feature(
     )
 
     start_time = time.time()
-    feature = _pairwise_feature_id_to_method.get(feature_id)
+    feature = _reference_aware_feature_id_to_method.get(feature_id)
     if feature is None:
         logger.info('Unknown feature "%s", skipping.' % feature_id)
         return None

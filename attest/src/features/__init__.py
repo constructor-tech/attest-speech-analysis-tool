@@ -19,9 +19,11 @@
 from .features import (
     is_attribute,
     is_metric,
-    is_pairwise_metric,
+    is_reference_aware_metric,
+    is_non_reference_aware_metric,
     is_feature,
-    is_pairwise_feature,
-    compute_feature,
-    compute_pairwise_feature,
+    is_reference_aware_feature,
+    is_non_reference_aware_feature,
+    compute_reference_aware_feature,
+    compute_non_reference_aware_feature,
 )

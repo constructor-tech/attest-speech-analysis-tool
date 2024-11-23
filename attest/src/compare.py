@@ -17,9 +17,9 @@
 #
 
 from attest.src.features import (
-    is_pairwise_feature,
-    compute_feature,
-    compute_pairwise_feature,
+    is_reference_aware_feature,
+    compute_reference_aware_feature,
+    compute_non_reference_aware_feature,
 )
 from attest.src.model import (
     load_project,
@@ -47,12 +47,12 @@ def compare(project1: str, project2: str, features: List[str], feature_params: D
     )
 
     for feature_id, cache_filename in zip(features, cache_filenames):
-        if is_pairwise_feature(feature_id):
-            result1 = compute_pairwise_feature(feature_id, project1, project2, cache_filename)
-            result2 = compute_pairwise_feature(feature_id, project2, project1, cache_filename)
+        if is_reference_aware_feature(feature_id):
+            result1 = compute_reference_aware_feature(feature_id, project1, project2, cache_filename)
+            result2 = compute_reference_aware_feature(feature_id, project2, project1, cache_filename)
         else:
-            result1 = compute_feature(feature_id, project1, cache_filename)
-            result2 = compute_feature(feature_id, project2, cache_filename)
+            result1 = compute_non_reference_aware_feature(feature_id, project1, cache_filename)
+            result2 = compute_non_reference_aware_feature(feature_id, project2, cache_filename)
 
         if result1 and result2:
             output.results[feature_id] = FeatureComparisonResult([result1, result2])

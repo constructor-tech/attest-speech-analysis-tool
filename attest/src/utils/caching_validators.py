@@ -29,7 +29,7 @@ def validate_feature_from_cache(feature_result, feature_id, project, cache_filen
     return cache_is_valid
 
 
-def validate_pairwise_feature_from_cache(feature_result, feature_id, hyp_project, ref_project, cache_filename):
+def validate_reference_aware_feature_from_cache(feature_result, feature_id, hyp_project, ref_project, cache_filename):
     feature_result_uids = [x.uid for x in feature_result.detailed]
     cache_is_valid = len(feature_result_uids) == len(hyp_project.uids) and all(
         uid in feature_result_uids for uid in hyp_project.uids

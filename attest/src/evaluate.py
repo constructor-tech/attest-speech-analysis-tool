@@ -16,7 +16,7 @@
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
 
-from attest.src.features import compute_feature, is_feature
+from attest.src.features import compute_non_reference_aware_feature, is_feature
 from attest.src.model import load_project, EvaluationResult
 from attest.src.settings import get_settings
 from typing import List, Dict
@@ -32,7 +32,7 @@ def evaluate(project: str, features: List[str], feature_params: Dict[str, str]) 
 
     for feature_id, cache_filename in zip(features, cache_filenames):
         if is_feature(feature_id):
-            feature_result = compute_feature(feature_id, project, cache_filename)
+            feature_result = compute_non_reference_aware_feature(feature_id, project, cache_filename)
             if feature_result:
                 output.results[feature_id] = feature_result
 

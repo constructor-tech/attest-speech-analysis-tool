@@ -27,6 +27,19 @@ from attest.src.utils.text_normalizer import get_text_normalizer
 from attest.src.utils.wavelet_prosody import get_wavelet_prosody_extractor
 
 
+def get_attribute_id_to_method():
+    return {
+        "audio": audio,
+        "text": text,
+        "text_norm": text_norm,
+        "text_phonemes": text_phonemes,
+        "transcript": transcript,
+        "transcript_phonemes": transcript_phonemes,
+        "pitch_plot": pitch_plot,
+        "wavelet_prosody": wavelet_prosody,
+    }
+
+
 def audio(project: Project) -> AttributeResult:
     detailed = [
         AttributeResultEntry(uid, audio_path=audio_path, message=uid)

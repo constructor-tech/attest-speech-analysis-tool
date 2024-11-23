@@ -26,6 +26,17 @@ from attest.src.utils.speech_bert_score import bert_score
 from attest.src.utils.wavlm_large import get_wavlm_large
 
 
+def get_reference_aware_metric_id_to_method():
+    return {
+        "vde": vde,
+        "gpe": gpe,
+        "ffe": ffe,
+        "logf0_rmse": logf0_rmse,
+        "sim_ecapa": sim_ecapa,
+        "speech_bert_score": speech_bert_score,
+    }
+
+
 def vde(hyp_project: Project, ref_project: Project) -> MetricResult:
     pitch_comparator = get_pitch_comparator()
     scores = pitch_comparator.compare_for_projects(hyp_project, ref_project, key="VDE")

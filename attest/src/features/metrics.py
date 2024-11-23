@@ -40,6 +40,28 @@ from attest.src.utils.squim import get_squim
 from attest.src.utils.utmos import get_utmos_strong
 
 
+def get_metric_id_to_method():
+    return {
+        "cer": cer,
+        "wer": wer,
+        "per": per,
+        "character_distance": character_distance,
+        "phoneme_distance": phoneme_distance,
+        "pronunciation_speed": pronunciation_speed,
+        "pronunciation_speed_phonemes": pronunciation_speed_phonemes,
+        "audio_duration": audio_duration,
+        "speech_duration": speech_duration,
+        "silence_begin": silence_begin,
+        "silence_end": silence_end,
+        "pitch_mean": pitch_mean,
+        "pitch_std": pitch_std,
+        "utmos": utmos,
+        "squim_stoi": squim_stoi,
+        "squim_pesq": squim_pesq,
+        "squim_sisdr": squim_sisdr,
+    }
+
+
 def cer(project: Project) -> MetricResult:
     asr = get_whisper()
     metric = CharErrorRate()
