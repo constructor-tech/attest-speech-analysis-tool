@@ -37,12 +37,15 @@ PROJECT_X_LABEL = lambda x: f"Project {x}"  # noqa: E731
 NUM_PROJECTS_FOR_MULTIPLE_COMPARE_LABEL = "Number of projects for multiple comparison"
 
 FEATURE_CONFIGURATION_LABEL = "**Feature configuration**"
-PHONEMIZATION_METHOD_LABEL = "Phonemization method. "
-PITCH_EXTRACT_METHOD_LABEL = "Pitch extraction method. "
+PHONEMIZATION_METHOD_LABEL = "Phonemization method"
+PITCH_EXTRACT_METHOD_LABEL = "Pitch extraction method"
 'This method is applied to the metrics "VDE/GPE/FFE/logF0 RMSE" and attributes "Pitch mean/std/plot"'
 TEXT_NORM_METHOD_LABEL = (
     'Text normalization method. This method is applied to the metrics "Character distance" and "Phoneme distance"'
 )
+WHISPER_LANGUAGE_LABEL = "Language parameter for Whisper speech recognition model"
+ESPEAK_LANGUAGE_LABEL = "Language parameter for Espeak grapheme-to-phoneme engine"
+
 
 VIEW_CONFIGURATION_LABEL = "**View configuration**"
 DISPLAY_ANALYSIS_LABEL = 'Display "Analysis" section'

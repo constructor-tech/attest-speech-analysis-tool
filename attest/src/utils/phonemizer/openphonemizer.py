@@ -31,6 +31,7 @@ from .phonemizer import Phonemizer
 
 _phonemizer = None
 
+
 def get_openphonemizer():
     global _phonemizer
     if _phonemizer is None:
@@ -82,4 +83,3 @@ class OpenPhonemizer(Phonemizer):
 
         self.logger.info("Phonemization is done!")
         return phonemes
-

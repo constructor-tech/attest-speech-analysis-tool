@@ -40,6 +40,8 @@ from attest.ui.utils import (
     get_list_of_pitch_extract_methods,
     get_list_of_text_norm_methods,
     get_list_of_phonemization_methods,
+    get_list_of_languages_whisper,
+    get_list_of_languages_espeak,
     resolve_group_path,
 )
 from attest.ui.view_utils import (
@@ -81,6 +83,8 @@ class View:
                 st.session_state.pitch_extract_method = st.session_state.selected_pitch_extract_method
                 st.session_state.text_norm_method = st.session_state.selected_text_norm_method
                 st.session_state.phonemization_method = st.session_state.selected_phonemization_method
+                st.session_state.whisper_language = st.session_state.selected_whisper_language
+                st.session_state.espeak_language = st.session_state.selected_espeak_language
 
         option_menu(
             None,
@@ -332,6 +336,32 @@ class View:
             phonemization_methods,
             index=index,
             key="selected_phonemization_method",
+        )
+
+        wshiper_languages = get_list_of_languages_whisper()
+        index = 0
+        for i, method in enumerate(wshiper_languages):
+            if method == st.session_state.whisper_language:
+                index = i
+        st.selectbox(
+            vc.WHISPER_LANGUAGE_LABEL,
+            wshiper_languages,
+            index=index,
+            key="selected_whisper_language",
+        )
+
+        espeak_languages = get_list_of_languages_espeak()
+        espeak_lang_selecbox_disabled = st.session_state.selected_phonemization_method != "espeak_phonemizer"
+        index = 0
+        for i, method in enumerate(espeak_languages):
+            if method == st.session_state.espeak_language:
+                index = i
+        st.selectbox(
+            vc.ESPEAK_LANGUAGE_LABEL,
+            espeak_languages,
+            index=index,
+            key="selected_espeak_language",
+            disabled=espeak_lang_selecbox_disabled,
         )
 
     def display_view_configuration(self):

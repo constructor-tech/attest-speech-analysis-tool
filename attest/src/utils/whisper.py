@@ -19,6 +19,7 @@
 import os
 import time
 import whisper
+from whisper.tokenizer import TO_LANGUAGE_CODE
 
 from attest.src.settings import get_settings
 from attest.src.model import Project
@@ -114,7 +115,7 @@ class Whisper:
                 audio_file,
                 word_timestamps=True,
                 fp16=settings.WHISPER_USE_FP16,
-                language="en",
+                language=TO_LANGUAGE_CODE[settings.WHISPER_LANGUAGE.lower()],
             )
             results.append(result)
 

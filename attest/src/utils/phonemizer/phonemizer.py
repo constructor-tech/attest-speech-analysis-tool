@@ -19,6 +19,7 @@
 from typing import List
 from attest.src.model import Project
 
+
 class Phonemizer:
 
     def phonemize_project(self, project: Project):

@@ -579,6 +579,18 @@ class PhonemeTokenizer:
             self.g2p = IsG2p()
         elif g2p_type == "g2p_is_north":
             self.g2p = IsG2p(dialect="north")
+        elif g2p_type.startswith("attest_espeak_ng_"):
+            language = g2p_type.split("_")[-1]
+            self.g2p = Phonemizer(
+                language=language,
+                backend="espeak",
+                with_stress=True,
+                preserve_punctuation=True,
+                strip=True,
+                word_separator=" ",
+                phone_separator="",
+                split_by_single_token=True,
+            )
         else:
             raise NotImplementedError(f"Not supported: g2p_type={g2p_type}")
 

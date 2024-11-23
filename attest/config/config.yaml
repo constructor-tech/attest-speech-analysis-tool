@@ -33,10 +33,13 @@ feature_params:
   text_normalization_method: "None" # one of "None", or "Nemo" (if installed)
 
 models:
+  espeak:
+    language: "English"
   wavlm:
     model_name: "microsoft/wavlm-large"
   whisper:
     model_name: "base"
+    language: "english"
     use_fp16: false
 
 default_view_preferences:

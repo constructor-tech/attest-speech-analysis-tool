@@ -23,7 +23,7 @@ from attest.src.model import Project
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
 from attest.src.utils.logger import get_logger
-from phoneme_tokenizer import PhonemeTokenizer # third_party
+from phoneme_tokenizer import PhonemeTokenizer  # third_party
 from .phonemizer import Phonemizer
 
 
@@ -41,12 +41,129 @@ def get_espeak_phonemizer():
 settings = get_settings()
 
 
+TO_LANGUAGE_CODE = {
+    "Afrikaans": "af",
+    "Amharic": "am",
+    "Aragonese": "an",
+    "Arabic": "ar",
+    "Assamese": "as",
+    "Azerbaijani": "az",
+    "Bashkir": "ba",
+    "Bulgarian": "bg",
+    "Bengali": "bn",
+    "Bishnupriya_Manipuri": "bpy",
+    "Bosnian": "bs",
+    "Catalan": "ca",
+    "Chinese_(Mandarin)": "cmn",
+    "Czech": "cs",
+    "Welsh": "cy",
+    "Danish": "da",
+    "German": "de",
+    "Greek": "el",
+    "English_(Caribbean)": "en-029",
+    "English_(Great_Britain)": "en-gb",
+    "English_(Scotland)": "en-gb-scotland",
+    "English_(Lancaster)": "en-gb-x-gbclan",
+    "English_(West_Midlands)": "en-gb-x-gbcwmd",
+    "English_(Received_Pronunciation)": "en-gb-x-rp",
+    "English_(America)": "en-us",
+    "Esperanto": "eo",
+    "Spanish_(Spain)": "es",
+    "Spanish_(Latin_America)": "es-419",
+    "Estonian": "et",
+    "Basque": "eu",
+    "Persian": "fa",
+    "Persian_(Pinglish)": "fa-latn",
+    "Finnish": "fi",
+    "French_(Belgium)": "fr-be",
+    "French_(Switzerland)": "fr-ch",
+    "French_(France)": "fr-fr",
+    "Gaelic_(Irish)": "ga",
+    "Gaelic_(Scottish)": "gd",
+    "Guarani": "gn",
+    "Greek_(Ancient)": "grc",
+    "Gujarati": "gu",
+    "Hakka_Chinese": "hak",
+    "Hindi": "hi",
+    "Croatian": "hr",
+    "Haitian_Creole": "ht",
+    "Hungarian": "hu",
+    "Armenian_(East_Armenia)": "hy",
+    "Armenian_(West_Armenia)": "hyw",
+    "Interlingua": "ia",
+    "Indonesian": "id",
+    "Icelandic": "is",
+    "Italian": "it",
+    "Japanese": "ja",
+    "Lojban": "jbo",
+    "Georgian": "ka",
+    "Kazakh": "kk",
+    "Greenlandic": "kl",
+    "Kannada": "kn",
+    "Korean": "ko",
+    "Konkani": "kok",
+    "Kurdish": "ku",
+    "Kyrgyz": "ky",
+    "Latin": "la",
+    "Lingua_Franca_Nova": "lfn",
+    "Lithuanian": "lt",
+    "Latvian": "lv",
+    "Māori": "mi",
+    "Macedonian": "mk",
+    "Malayalam": "ml",
+    "Marathi": "mr",
+    "Malay": "ms",
+    "Maltese": "mt",
+    "Myanmar_(Burmese)": "my",
+    "Norwegian_Bokmål": "nb",
+    "Nahuatl_(Classical)": "nci",
+    "Nepali": "ne",
+    "Dutch": "nl",
+    "Oromo": "om",
+    "Oriya": "or",
+    "Punjabi": "pa",
+    "Papiamento": "pap",
+    "Polish": "pl",
+    "Portuguese_(Portugal)": "pt",
+    "Portuguese_(Brazil)": "pt-br",
+    "Pyash": "py",
+    "K'iche'": "quc",
+    "Romanian": "ro",
+    "Russian": "ru",
+    "Russian_(Latvia)": "ru-lv",
+    "Sindhi": "sd",
+    "Shan_(Tai_Yai)": "shn",
+    "Sinhala": "si",
+    "Slovak": "sk",
+    "Slovenian": "sl",
+    "Albanian": "sq",
+    "Serbian": "sr",
+    "Swedish": "sv",
+    "Swahili": "sw",
+    "Tamil": "ta",
+    "Telugu": "te",
+    "Setswana": "tn",
+    "Turkish": "tr",
+    "Tatar": "tt",
+    "Urdu": "ur",
+    "Uzbek": "uz",
+    "Vietnamese_(Northern)": "vi",
+    "Vietnamese_(Central)": "vi-vn-x-central",
+    "Vietnamese_(Southern)": "vi-vn-x-south",
+    "Chinese_(Cantonese)": "yue",
+}
+
+
 class EspeakPhonemizer(Phonemizer):
 
     def __init__(self):
         self.logger = get_logger()
-        self.g2p_type = "espeak_ng_english_us_vits"
-        self.phoneme_tokenizer = PhonemeTokenizer(self.g2p_type)
+        lang = settings.ESPEAK_LANGUAGE
+        if lang == "English":
+            g2p_type = "espeak_ng_english_us_vits"
+        else:
+            g2p_type = f"attest_espeak_ng_{TO_LANGUAGE_CODE[lang]}"
+        self.phoneme_tokenizer = PhonemeTokenizer(g2p_type)
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/g2p/espeak_phonemizer/phonemes.txt",
@@ -58,7 +175,7 @@ class EspeakPhonemizer(Phonemizer):
 
         self.logger.info("Phonemizing texts...")
         phonemes = [self.phonemize(text) for text in project.texts]
-        
+
         self.logger.info("Phonemization is done, caching...")
         return phonemes
 
@@ -80,5 +197,3 @@ class EspeakPhonemizer(Phonemizer):
         phonemes = self.phoneme_tokenizer.text2tokens(text)
         phonemes = "".join(phonemes).replace("<space>", " ")
         return phonemes
-
-

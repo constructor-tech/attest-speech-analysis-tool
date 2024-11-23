@@ -27,6 +27,7 @@ By organizing metrics into five categories, ATTEST makes it easier to assess dif
     - [Feature Types](#feature-types)
     - [Metrics](#metrics)
     - [Attributes](#attributes)
+    - [Language Support](#language-support)
   - [Advanced Usage: CLI Examples](#advanced-usage-cli-examples)
   - [Use Cases](#use-cases)
   - [Contributions](#contributions)
@@ -160,6 +161,19 @@ Below is a list of the attributes available in ATTEST. Each attribute also has a
 - **Pitch std** *(CLI Identifier: `pitch_std`, GPU preferred if used torchcrepe model for the extraction)*: The standard deviation of the fundamental frequency, reflecting pitch variability.
 - **Pitch plot** *(CLI Identifier: `pitch_plot`, GPU preferred if used torchcrepe model for the extraction)*: A visual representation of the pitch contour over time, illustrating intonation patterns and prosody.
 - **Wavelet prosody plot** *(CLI Identifier: `wavelet_prosody`)*: A graphical depiction of prosodic features like pitch, energy, and wavelets, generated using the [wavelet_prosody_toolkit](https://github.com/asuni/wavelet_prosody_toolkit) project.
+
+
+### Language Support
+
+ATTEST provides metrics that vary in language compatibility:
+
+- **Language-idependent metrics**: Metrics such as VDE, GPE, FFE, logF0 RMSE, and Squim family metrics (STOI, PESQ, SI-SDR) are language-independent, as they reflect properties unrelated to specific languages.
+- **Applicable to all languages**: Metrics like UTMOS, SpeechBERTScore, Speaker Similarity (ECAPA-TDNN) and Squim-metrics use components trained primarily on English data. However, since the metric reflects a language-independent property, it could generalize to audio in other languages.
+- **Language-specific metrics**:
+  - CER, WER, Character distance: Limited to languages supported by [Whisper](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+  - PER, Phoneme distance: Limited to languages supported by both [Whisper](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10) and [Espeak](https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md).
+
+Refer to the [metrics table](docs/metrics_overview.md) for a detailed view of language compatibility.
 
 
 ## Advanced Usage: CLI Examples

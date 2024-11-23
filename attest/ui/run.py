@@ -89,6 +89,18 @@ def init_session_state():
     if "selected_phonemization_method" not in st.session_state:
         st.session_state.selected_phonemization_method = st.session_state.phonemization_method
 
+    if "whisper_language" not in st.session_state:
+        st.session_state.whisper_language = "English"
+
+    if "selected_whisper_language" not in st.session_state:
+        st.session_state.selected_whisper_language = st.session_state.whisper_language
+
+    if "espeak_language" not in st.session_state:
+        st.session_state.espeak_language = "English"
+
+    if "selected_espeak_language" not in st.session_state:
+        st.session_state.selected_espeak_language = st.session_state.espeak_language
+
 
 def get_projects():
     projects = []
@@ -116,6 +128,8 @@ if __name__ == "__main__":
         "pitch_extraction_method": st.session_state.pitch_extract_method,
         "text_normalization_method": st.session_state.text_norm_method,
         "phonemization_method": st.session_state.phonemization_method,
+        "whisper_language": st.session_state.whisper_language,
+        "espeak_language": st.session_state.espeak_language,
     }
 
     has_new_features = any(x not in st.session_state.features for x in settings.FEATURES)

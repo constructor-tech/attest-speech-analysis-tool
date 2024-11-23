@@ -16,7 +16,6 @@
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
 
-from attest.src.model import Project
 from .phonemizer import Phonemizer
 from .espeak_phonemizer import EspeakPhonemizer, get_espeak_phonemizer
 from .openphonemizer import OpenPhonemizer, get_openphonemizer
@@ -25,9 +24,7 @@ from attest.src.settings import get_settings
 from attest.src.utils.logger import get_logger
 
 
-
 def get_phonemizer() -> Phonemizer:
-    logger = get_logger()
     settings = get_settings()
     match settings.PHONEMIZATION_METHOD:
         case "espeak_phonemizer":

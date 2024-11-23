@@ -88,7 +88,9 @@ def is_non_reference_aware_feature(feature_id: str) -> bool:
     method="pickle",
     validator=validate_feature_from_cache,
 )
-def compute_non_reference_aware_feature(feature_id: str, project: Project, cache_filename: str) -> Union[AttributeResult, MetricResult]:
+def compute_non_reference_aware_feature(
+    feature_id: str, project: Project, cache_filename: str
+) -> Union[AttributeResult, MetricResult]:
     logger.info('Computing feature "%s" for project "%s"...' % (feature_id, project.name))
 
     start_time = time.time()

@@ -32,9 +32,11 @@ class Settings(BaseModel):
     PHONEMIZATION_METHOD: str
     PITCH_EXTRACT_METHOD: str
     TEXT_NORM_METHOD: str
+    ESPEAK_LANGUAGE: str
     WAVLM_MODEL_NAME: str
     WHISPER_MODEL_NAME: str
     WHISPER_USE_FP16: bool
+    WHISPER_LANGUAGE: str
 
     def apply_feature_params(self, feature_params: Dict[str, str]):
         if "phonemization_method" in feature_params:
@@ -43,6 +45,10 @@ class Settings(BaseModel):
             self.PITCH_EXTRACT_METHOD = feature_params["pitch_extraction_method"]
         if "text_normalization_method" in feature_params:
             self.TEXT_NORM_METHOD = feature_params["text_normalization_method"]
+        if "whisper_language" in feature_params:
+            self.WHISPER_LANGUAGE = feature_params["whisper_language"]
+        if "espeak_language" in feature_params:
+            self.ESPEAK_LANGUAGE = feature_params["espeak_language"]
 
     def get_feature_basenames(self, features: List[str]):
         output = []
@@ -54,7 +60,9 @@ class Settings(BaseModel):
             elif feature_id in ["cer", "wer", "character_distance"]:
                 output.append(f"{feature_id}-{self.WHISPER_MODEL_NAME}-{self.TEXT_NORM_METHOD}")
             elif feature_id in ["per", "phoneme_distance"]:
-                output.append(f"{feature_id}-{self.WHISPER_MODEL_NAME}-{self.TEXT_NORM_METHOD}-{self.PHONEMIZATION_METHOD}")
+                output.append(
+                    f"{feature_id}-{self.WHISPER_MODEL_NAME}-{self.TEXT_NORM_METHOD}-{self.PHONEMIZATION_METHOD}"
+                )
             elif feature_id in ["pitch_mean", "pitch_std", "pitch_plot", "vde", "gpe", "ffe", "logf0_rmse"]:
                 output.append(f"{feature_id}-{self.PITCH_EXTRACT_METHOD}")
             else:
@@ -94,9 +102,11 @@ def load_settings(config_path: str) -> Settings:
         "PHONEMIZATION_METHOD": data["feature_params"]["phonemization_method"],
         "PITCH_EXTRACT_METHOD": data["feature_params"]["pitch_extraction_method"],
         "TEXT_NORM_METHOD": data["feature_params"]["text_normalization_method"],
+        "ESPEAK_LANGUAGE": data["models"]["espeak"]["language"],
         "WAVLM_MODEL_NAME": data["models"]["wavlm"]["model_name"],
         "WHISPER_MODEL_NAME": data["models"]["whisper"]["model_name"],
         "WHISPER_USE_FP16": data["models"]["whisper"]["use_fp16"],
+        "WHISPER_LANGUAGE": data["models"]["whisper"]["language"],
     }
 
     try:

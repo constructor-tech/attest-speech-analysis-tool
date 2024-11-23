@@ -98,11 +98,7 @@ class ParselmouthPitchExtractor(PitchExtractor):
             i0, i1 = i, i + 1
             local_pitch_sum = pitch_array[i]
             local_pitch_mean = pitch_array[i]
-            while (
-                i1 < n
-                and pitch_array[i1] != 0
-                and 0.66 < pitch_array[i1] / local_pitch_mean < 1.5
-            ):
+            while i1 < n and pitch_array[i1] != 0 and 0.66 < pitch_array[i1] / local_pitch_mean < 1.5:
                 local_pitch_sum += pitch_array[i1]
                 local_pitch_mean = local_pitch_sum / (i1 + 1 - i0)
                 i1 += 1
@@ -112,4 +108,3 @@ class ParselmouthPitchExtractor(PitchExtractor):
 
             i = i1
         return pitch_array
-
