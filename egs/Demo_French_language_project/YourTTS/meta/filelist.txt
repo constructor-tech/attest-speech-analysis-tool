@@ -1,0 +1,2 @@
+seen_speaker.wav|Le concept d'emploi budgétaire est utilisé lors de la négociation entre le ministère du budget et le ministre chargé de l'enseignement supérieur
+unseen_speaker.wav|Au niveau national le premier délégué assume toutes les responsabilités pour ce qui concerne le concours national de mémoires
