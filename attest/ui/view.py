@@ -118,7 +118,7 @@ class View:
                     )
                     selected = st.checkbox(
                         label,
-                        value=feature in self.settings.FEATURES,
+                        value=(feature in self.settings.FEATURES and not disabled),
                         disabled=disabled,
                     )
                     if selected:
