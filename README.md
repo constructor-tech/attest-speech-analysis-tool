@@ -5,7 +5,7 @@
 **ATTEST** is a powerful evaluation framework designed to streamline the analysis of (synthesized) speech by integrating a variety of metrics across multiple dimensions. It consolidates speech evaluation into five distinct categories, each equipped with a set of metrics to thoroughly assess various aspects of speech quality:
 
 - **Speech Intelligibility**: Focuses on how accurately a TTS model reproduces the intended text, emphasizing the clarity with which spoken words are understood. The primary metrics used include CER (Character Error Rate), WER (Word Error Rate), and PER (Phoneme Error Rate).
-- **Speech Prosody**: Assesses the naturalness and expressiveness of speech prosody, using pitch analysis metrics such as voicing decision error (VDE), gross pitch error (GPE), fine pitch error (FFE), and logarithmic frequency root mean square error (Log F0 RMSE).
+- **Speech Prosody**: Assesses the naturalness and expressiveness of speech prosody, using pitch analysis metrics such as voicing decision error (VDE), gross pitch error (GPE), fine pitch error (FFE), and logarithmic frequency root mean square error (Log F0 RMSE). ATTEST supports multiple pitch extraction engines, including Parselmouth, PyWorld, and CREPE.
 - **Speaker Similarity**: Measures how closely the synthesized voice matches the target speaker, crucial for applications like voice cloning. Metrics for this include speaker similarity based on a comparison of embeddings obtained using the ECAPA-TDNN speaker verification model.
 - **Signal Quality**: Analyzes the overall audio quality and intelligibility of the speech signal with metrics like PESQ, STOI, and TorchAudio-Squim.
 - **MOS Prediction**: Uses metrics such as UTMOS and SpeechBERTScore to predict Mean Opinion Scores, simulating subjective listening tests through objective analysis.
@@ -249,7 +249,7 @@ ATTEST is built upon and integrates various tools, libraries, and models. We wou
 - **[OpenPhonemizer](https://github.com/NeuralVox/OpenPhonemizer)**: Employed as the grapheme-to-phoneme (G2P) engine.
 - **[torchcrepe](https://github.com/maxrmorrison/torchcrepe)**: Used as the pitch extraction engine.
 - **[Parselmouth](https://github.com/YannickJadoul/Parselmouth)**: Used as the pitch extraction engine.
-- **[pyworld](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)**: Used as the pitch extraction engine.
+- **[PyWorld](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)**: Used as the pitch extraction engine.
 - **[VDE, GPE, FFE, logF0 RMSE](https://www.seas.ucla.edu/spapl/paper/chu_icassp_09.pdf)**: Used as speech intonation metrics.
 
 
