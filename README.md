@@ -248,7 +248,8 @@ ATTEST is built upon and integrates various tools, libraries, and models. We wou
 - **[SpeechBrain](https://github.com/speechbrain/speechbrain)**: Employed for speaker similarity using the ECAPA-TDNN model.
 - **[OpenPhonemizer](https://github.com/NeuralVox/OpenPhonemizer)**: Employed as the grapheme-to-phoneme (G2P) engine.
 - **[torchcrepe](https://github.com/maxrmorrison/torchcrepe)**: Used as the pitch extraction engine.
-- **[pyworld](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)**: Another pitch extraction engine used within the project.
+- **[Parselmouth](https://github.com/YannickJadoul/Parselmouth)**: Used as the pitch extraction engine.
+- **[pyworld](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)**: Used as the pitch extraction engine.
 - **[VDE, GPE, FFE, logF0 RMSE](https://www.seas.ucla.edu/spapl/paper/chu_icassp_09.pdf)**: Used as speech intonation metrics.
 
 

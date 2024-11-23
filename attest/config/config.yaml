@@ -28,7 +28,7 @@ directories:
 device: "cuda"
 
 feature_params:
-  pitch_extraction_method: "pyworld" # one of  "pyworld", "torchcrepe-tiny", or "torchcrepe-full"
+  pitch_extraction_method: "parselmouth" # one of  "parselmouth", "pyworld", "torchcrepe-tiny", or "torchcrepe-full"
   text_normalization_method: "None" # one of "None", or "Nemo" (if installed)
 
 models:

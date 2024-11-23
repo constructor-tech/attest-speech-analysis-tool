@@ -48,9 +48,7 @@ class Settings(BaseModel):
                 output.append(f"{feature_id}-{self.TEXT_NORM_METHOD}")
             elif feature_id in ["cer", "wer", "per", "character_distance", "phoneme_distance"]:
                 output.append(f"{feature_id}-{self.WHISPER_MODEL_NAME}-{self.TEXT_NORM_METHOD}")
-            elif feature_id in ["pitch_mean", "pitch_std", "pitch_plot"]:
-                output.append(f"{feature_id}-{self.PITCH_EXTRACT_METHOD}")
-            elif feature_id in ["vde", "gpe", "ffe", "logf0_rmse"]:
+            elif feature_id in ["pitch_mean", "pitch_std", "pitch_plot", "vde", "gpe", "ffe", "logf0_rmse"]:
                 output.append(f"{feature_id}-{self.PITCH_EXTRACT_METHOD}")
             else:
                 output.append(feature_id)

@@ -17,6 +17,7 @@
 #
 
 from .pitch_extractor import PitchExtractor
+from .parselmouth_pitch_extractor import get_parselmouth_pitch_extractor, ParselmouthPitchExtractor
 from .pyworld_pitch_extractor import get_pyworld_pitch_extractor, PyworldPitchExtractor
 from .torchcrepe_pitch_extractor import (
     get_torchcrepe_pitch_extractor,
@@ -31,6 +32,8 @@ def get_pitch_extractor() -> PitchExtractor:
     logger = get_logger()
     settings = get_settings()
     match settings.PITCH_EXTRACT_METHOD:
+        case "parselmouth":
+            return get_parselmouth_pitch_extractor()
         case "torchcrepe-tiny":
             return get_torchcrepe_pitch_extractor("tiny")
         case "torchcrepe-full":

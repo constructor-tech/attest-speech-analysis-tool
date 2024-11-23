@@ -72,7 +72,7 @@ def init_session_state():
             st.session_state[f"selected_project_{i}"] = st.session_state[f"project_{i}"]
 
     if "pitch_extract_method" not in st.session_state:
-        st.session_state.pitch_extract_method = "pyworld"
+        st.session_state.pitch_extract_method = "parselmouth"
 
     if "selected_pitch_extract_method" not in st.session_state:
         st.session_state.selected_pitch_extract_method = st.session_state.pitch_extract_method

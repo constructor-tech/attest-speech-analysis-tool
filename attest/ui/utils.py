@@ -56,7 +56,7 @@ def get_list_of_projects(path):
 
 
 def get_list_of_pitch_extract_methods():
-    methods = ["pyworld", "torchcrepe-tiny", "torchcrepe-full"]
+    methods = ["parselmouth", "pyworld", "torchcrepe-tiny", "torchcrepe-full"]
     return methods
 
 
