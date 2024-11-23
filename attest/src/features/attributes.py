@@ -59,7 +59,7 @@ def text_phonemes(project: Project) -> AttributeResult:
     texts_norm = text_normalizer.normalize_project(project)
 
     settings = get_settings()
-    cache_path = f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}.txt"
+    cache_path = f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}-{settings.PHONEMIZATION_METHOD}.txt"
 
     phonemizer = get_phonemizer()
     phonemes = phonemizer.phonemize_many(texts_norm, cache_path)
@@ -73,7 +73,7 @@ def transcript_phonemes(project: Project) -> AttributeResult:
     transcriptions = asr.transcribe_project(project)
 
     settings = get_settings()
-    cache_path = f"{project.name}/g2p/phonemes-{settings.WHISPER_MODEL_NAME}.txt"
+    cache_path = f"{project.name}/g2p/phonemes-{settings.WHISPER_MODEL_NAME}-{settings.PHONEMIZATION_METHOD}.txt"
 
     phonemizer = get_phonemizer()
     phonemes = phonemizer.phonemize_many(transcriptions, cache_path)

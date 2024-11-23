@@ -47,6 +47,10 @@ def check_if_project(path):
     return os.path.exists(file_path)
 
 
+def resolve_group_path(data_dir, group=None):
+    return f"{data_dir}/{group}" if group else data_dir
+
+
 def get_list_of_groups(path):
     return [x for x in os.listdir(path) if check_if_group(f"{path}/{x}")]
 
@@ -60,10 +64,6 @@ def get_list_of_pitch_extract_methods():
     return methods
 
 
-def resolve_group_path(data_dir, group=None):
-    return f"{data_dir}/{group}" if group else data_dir
-
-
 def get_list_of_text_norm_methods():
     methods = ["None"]
     try:
@@ -72,4 +72,9 @@ def get_list_of_text_norm_methods():
         methods.append("Nemo")
     except ImportError:
         pass
+    return methods
+
+
+def get_list_of_phonemization_methods():
+    methods = ["openphonemizer", "espeak_phonemizer"]
     return methods

@@ -18,7 +18,7 @@ By organizing metrics into five categories, ATTEST makes it easier to assess dif
 - [ATTEST: an Analytics Tool for the Testing and Evaluation of Speech Technologies](#attest-an-analytics-tool-for-the-testing-and-evaluation-of-speech-technologies)
   - [Contents](#contents)
   - [Installation](#installation)
-    - [Important Notes](#important-notes)
+    - [Installation Notes](#installation-notes)
     - [Extra Packages](#extra-packages)
   - [Getting Started](#getting-started)
   - [ATTEST Overview](#attest-overview)
@@ -48,9 +48,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Important Notes
+### Installation Notes
 
-If you encounter issues with installing PyTorch, please refer to the official [PyTorch installation guide](https://pytorch.org/get-started/locally/).
+1. **PyTorch Installation**: If you encounter issues with installing PyTorch, please refer to the official [PyTorch installation guide](https://pytorch.org/get-started/locally/).
+
+2. **Espeak Phonemizer**: To use the `espeak-phonemizer` backend for phonemization, you need to install the `espeak-ng` system dependency. Detailed installation instructions are available in the [Phonemizer installation guide](https://bootphon.github.io/phonemizer/install.html#dependencies).
 
 
 ### Extra Packages
@@ -245,8 +247,9 @@ ATTEST is built upon and integrates various tools, libraries, and models. We wou
 - **[UTMOS](https://github.com/sarulab-speech/UTMOS22)**: Used for the UTMOS metric.
 - **[Whisper](https://github.com/openai/whisper)**: Used as the ASR and forced alignment engine.
 - **[WavLM](https://github.com/microsoft/unilm)**: Contributes to the SpeechBERTScore metric.
-- **[SpeechBrain](https://github.com/speechbrain/speechbrain)**: Employed for speaker similarity using the ECAPA-TDNN model.
-- **[OpenPhonemizer](https://github.com/NeuralVox/OpenPhonemizer)**: Employed as the grapheme-to-phoneme (G2P) engine.
+- **[SpeechBrain](https://github.com/speechbrain/speechbrain)**: Used for speaker similarity using the ECAPA-TDNN model.
+- **[OpenPhonemizer](https://github.com/NeuralVox/OpenPhonemizer)**: Used as the grapheme-to-phoneme (G2P) engine.
+- **[Phonemizer](https://github.com/bootphon/phonemizer)**: Used as the grapheme-to-phoneme (G2P) engine.
 - **[torchcrepe](https://github.com/maxrmorrison/torchcrepe)**: Used as the pitch extraction engine.
 - **[Parselmouth](https://github.com/YannickJadoul/Parselmouth)**: Used as the pitch extraction engine.
 - **[PyWorld](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)**: Used as the pitch extraction engine.

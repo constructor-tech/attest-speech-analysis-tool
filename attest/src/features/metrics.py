@@ -83,12 +83,12 @@ def per(project: Project) -> MetricResult:
 
     transcriptions = asr.transcribe_project(project)
     transcriptions_phonemes = phonemizer.phonemize_many(
-        transcriptions, f"{project.name}/g2p/phonemes-{settings.WHISPER_MODEL_NAME}.txt"
+        transcriptions, f"{project.name}/g2p/phonemes-{settings.WHISPER_MODEL_NAME}-{settings.PHONEMIZATION_METHOD}.txt"
     )
 
     texts_norm = text_normalizer.normalize_project(project)
     texts_phonemes = phonemizer.phonemize_many(
-        texts_norm, f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}.txt"
+        texts_norm, f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}-{settings.PHONEMIZATION_METHOD}.txt"
     )
 
     texts_for_cer = [format_text_for_edit_distance(x) for x in texts_phonemes]
@@ -124,12 +124,12 @@ def phoneme_distance(project: Project) -> MetricResult:
 
     texts_norm = text_normalizer.normalize_project(project)
     texts_phonemes = phonemizer.phonemize_many(
-        texts_norm, f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}.txt"
+        texts_norm, f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}-{settings.PHONEMIZATION_METHOD}.txt"
     )
 
     transcriptions = asr.transcribe_project(project)
     transcriptions_phonemes = phonemizer.phonemize_many(
-        transcriptions, f"{project.name}/g2p/phonemes-{settings.WHISPER_MODEL_NAME}.txt"
+        transcriptions, f"{project.name}/g2p/phonemes-{settings.WHISPER_MODEL_NAME}-{settings.PHONEMIZATION_METHOD}.txt"
     )
 
     texts_for_cer = [format_text_for_edit_distance(x) for x in texts_phonemes]
@@ -237,7 +237,7 @@ def pronunciation_speed_phonemes(project: Project) -> MetricResult:
     phonemizer = get_phonemizer()
     texts_norm = text_normalizer.normalize_project(project)
     texts_norm_phonemes = phonemizer.phonemize_many(
-        texts_norm, f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}.txt"
+        texts_norm, f"{project.name}/g2p/phonemes-{settings.TEXT_NORM_METHOD}-{settings.PHONEMIZATION_METHOD}.txt"
     )
 
     total = 0

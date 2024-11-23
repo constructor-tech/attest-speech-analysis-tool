@@ -39,6 +39,7 @@ from attest.ui.utils import (
     get_list_of_projects,
     get_list_of_pitch_extract_methods,
     get_list_of_text_norm_methods,
+    get_list_of_phonemization_methods,
     resolve_group_path,
 )
 from attest.ui.view_utils import (
@@ -79,6 +80,7 @@ class View:
                     st.session_state[f"project_{i}"] = st.session_state[f"selected_project_{i}"]
                 st.session_state.pitch_extract_method = st.session_state.selected_pitch_extract_method
                 st.session_state.text_norm_method = st.session_state.selected_text_norm_method
+                st.session_state.phonemization_method = st.session_state.selected_phonemization_method
 
         option_menu(
             None,
@@ -318,6 +320,18 @@ class View:
             text_norm_methods,
             index=index,
             key="selected_text_norm_method",
+        )
+
+        phonemization_methods = get_list_of_phonemization_methods()
+        index = 0
+        for i, method in enumerate(phonemization_methods):
+            if method == st.session_state.phonemization_method:
+                index = i
+        st.selectbox(
+            vc.PHONEMIZATION_METHOD_LABEL,
+            phonemization_methods,
+            index=index,
+            key="selected_phonemization_method",
         )
 
     def display_view_configuration(self):

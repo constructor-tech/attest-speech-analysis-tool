@@ -28,6 +28,7 @@ directories:
 device: "cuda"
 
 feature_params:
+  phonemization_method: "openphonemizer" # one of  "espeak_phonemizer", "openphonemizer"
   pitch_extraction_method: "parselmouth" # one of  "parselmouth", "pyworld", "torchcrepe-tiny", or "torchcrepe-full"
   text_normalization_method: "None" # one of "None", or "Nemo" (if installed)
 

@@ -6,6 +6,7 @@ numpy==1.26.2
 omegaconf==2.3.0
 openai-whisper==20231117
 openphonemizer==0.1.2
+phonemizer==3.0.1
 praat-parselmouth==0.4.3
 pycwt==0.4.0b0
 pydantic==2.8.2

@@ -83,6 +83,12 @@ def init_session_state():
     if "selected_text_norm_method" not in st.session_state:
         st.session_state.selected_text_norm_method = st.session_state.text_norm_method
 
+    if "phonemization_method" not in st.session_state:
+        st.session_state.phonemization_method = "openphonemizer"
+
+    if "selected_phonemization_method" not in st.session_state:
+        st.session_state.selected_phonemization_method = st.session_state.phonemization_method
+
 
 def get_projects():
     projects = []
@@ -109,6 +115,7 @@ if __name__ == "__main__":
     feature_params = {
         "pitch_extraction_method": st.session_state.pitch_extract_method,
         "text_normalization_method": st.session_state.text_norm_method,
+        "phonemization_method": st.session_state.phonemization_method,
     }
 
     has_new_features = any(x not in st.session_state.features for x in settings.FEATURES)

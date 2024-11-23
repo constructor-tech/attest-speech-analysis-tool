@@ -29,6 +29,7 @@ class Settings(BaseModel):
     MODELS_DIR: str
     THIRD_PARTY_DIR: str
     DEVICE: str
+    PHONEMIZATION_METHOD: str
     PITCH_EXTRACT_METHOD: str
     TEXT_NORM_METHOD: str
     WAVLM_MODEL_NAME: str
@@ -36,6 +37,8 @@ class Settings(BaseModel):
     WHISPER_USE_FP16: bool
 
     def apply_feature_params(self, feature_params: Dict[str, str]):
+        if "phonemization_method" in feature_params:
+            self.PHONEMIZATION_METHOD = feature_params["phonemization_method"]
         if "pitch_extraction_method" in feature_params:
             self.PITCH_EXTRACT_METHOD = feature_params["pitch_extraction_method"]
         if "text_normalization_method" in feature_params:
@@ -46,8 +49,12 @@ class Settings(BaseModel):
         for feature_id in features:
             if feature_id in ["text_norm"]:
                 output.append(f"{feature_id}-{self.TEXT_NORM_METHOD}")
-            elif feature_id in ["cer", "wer", "per", "character_distance", "phoneme_distance"]:
+            elif feature_id in ["text_phonemes", "transcript_phonemes", "pronunciation_speed_phonemes"]:
+                output.append(f"{feature_id}-{self.PHONEMIZATION_METHOD}")
+            elif feature_id in ["cer", "wer", "character_distance"]:
                 output.append(f"{feature_id}-{self.WHISPER_MODEL_NAME}-{self.TEXT_NORM_METHOD}")
+            elif feature_id in ["per", "phoneme_distance"]:
+                output.append(f"{feature_id}-{self.WHISPER_MODEL_NAME}-{self.TEXT_NORM_METHOD}-{self.PHONEMIZATION_METHOD}")
             elif feature_id in ["pitch_mean", "pitch_std", "pitch_plot", "vde", "gpe", "ffe", "logf0_rmse"]:
                 output.append(f"{feature_id}-{self.PITCH_EXTRACT_METHOD}")
             else:
@@ -84,6 +91,7 @@ def load_settings(config_path: str) -> Settings:
         "MODELS_DIR": data["directories"]["models_dir"],
         "THIRD_PARTY_DIR": data["directories"]["third_party_dir"],
         "DEVICE": get_device(data["device"]),
+        "PHONEMIZATION_METHOD": data["feature_params"]["phonemization_method"],
         "PITCH_EXTRACT_METHOD": data["feature_params"]["pitch_extraction_method"],
         "TEXT_NORM_METHOD": data["feature_params"]["text_normalization_method"],
         "WAVLM_MODEL_NAME": data["models"]["wavlm"]["model_name"],
