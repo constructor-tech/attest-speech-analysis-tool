@@ -59,6 +59,7 @@ default_view_preferences:
     squim_stoi: false
     squim_pesq: false
     squim_sisdr: false
+    squim_mos: false
     pronunciation_speed: false
     pronunciation_speed_phonemes: false
     audio_duration: false

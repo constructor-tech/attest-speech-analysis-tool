@@ -69,8 +69,8 @@ class UTMOSPredictor:
         scores = []
         self.load_predictor()
         self.logger.info("Computing scores...")
-        for x in project.audio_files:
-            scores.append(self.predict(x))
+        for audio_path in project.audio_files:
+            scores.append(self.predict(audio_path))
         self.logger.info("Computing scores is done!")
         return scores
 

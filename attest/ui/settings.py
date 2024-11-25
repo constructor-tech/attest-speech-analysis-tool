@@ -104,6 +104,7 @@ class Settings(BaseModel):
                     MetricType.REFERENCE_AWARE_METRIC,
                     "↑",
                 ),
+                ("Squim MOS", "squim_mos", MetricType.REFERENCE_AWARE_METRIC, "↑"),
             ],
         ),
         (

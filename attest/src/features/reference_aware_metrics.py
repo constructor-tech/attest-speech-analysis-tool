@@ -23,6 +23,7 @@ from attest.src.model import Project, MetricResultEntry, MetricResult
 from attest.src.utils.pitch_comparator import get_pitch_comparator
 from attest.src.utils.speaker_embedder import SpeakerEmbedder, get_ecapa_embedder
 from attest.src.utils.speech_bert_score import bert_score
+from attest.src.utils.squim import get_squim
 from attest.src.utils.wavlm_large import get_wavlm_large
 
 
@@ -34,6 +35,7 @@ def get_reference_aware_metric_id_to_method():
         "logf0_rmse": logf0_rmse,
         "sim_ecapa": sim_ecapa,
         "speech_bert_score": speech_bert_score,
+        "squim_mos": squim_mos,
     }
 
 
@@ -105,6 +107,16 @@ def speech_bert_score(hyp_project: Project, ref_project: Project) -> MetricResul
     ref_features = wavlm_large.extract_features_for_project(ref_project, 14)  # layer 14
 
     scores = [bert_score(x, y)[0] for x, y in zip(hyp_features, ref_features)]
+
+    overall = mean(scores)
+    detailed = [MetricResultEntry(uid, score) for uid, score in zip(hyp_project.uids, scores)]
+
+    return MetricResult(overall=overall, detailed=detailed)
+
+
+def squim_mos(hyp_project: Project, ref_project: Project) -> MetricResult:
+    predictor = get_squim()
+    scores = predictor.predict_project_subjective(hyp_project, ref_project)
 
     overall = mean(scores)
     detailed = [MetricResultEntry(uid, score) for uid, score in zip(hyp_project.uids, scores)]

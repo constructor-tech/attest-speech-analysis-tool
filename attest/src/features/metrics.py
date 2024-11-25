@@ -287,7 +287,7 @@ def utmos(project: Project) -> MetricResult:
 
 def squim_stoi(project: Project) -> MetricResult:
     predictor = get_squim()
-    scores = predictor.predict_project(project, key="STOI")
+    scores = predictor.predict_project_objective(project, key="STOI")
 
     overall = mean(scores)
     detailed = [MetricResultEntry(uid, score) for uid, score in zip(project.uids, scores)]
@@ -297,7 +297,7 @@ def squim_stoi(project: Project) -> MetricResult:
 
 def squim_pesq(project: Project) -> MetricResult:
     predictor = get_squim()
-    scores = predictor.predict_project(project, key="PESQ")
+    scores = predictor.predict_project_objective(project, key="PESQ")
 
     overall = mean(scores)
     detailed = [MetricResultEntry(uid, score) for uid, score in zip(project.uids, scores)]
@@ -307,7 +307,7 @@ def squim_pesq(project: Project) -> MetricResult:
 
 def squim_sisdr(project: Project) -> MetricResult:
     predictor = get_squim()
-    scores = predictor.predict_project(project, key="SI-SDR")
+    scores = predictor.predict_project_objective(project, key="SI-SDR")
 
     overall = mean(scores)
     detailed = [MetricResultEntry(uid, score) for uid, score in zip(project.uids, scores)]

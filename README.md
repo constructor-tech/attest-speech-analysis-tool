@@ -115,6 +115,7 @@ Below is a list of the metrics available in ATTEST. Each metric also has an iden
 
     - **UTMOS** *(CLI Identifier: `utmos`, GPU preferred)*: Predicts the Mean Opinion Score (MOS) to assess the overall perceived quality of synthesized speech.
     - **SpeechBERTScore**  *(CLI Identifier: `speech_bert_score`, Reference required, GPU preferred)*: Measures the similarity between synthesized and reference speech by comparing their contextualized embeddings derived from a WavLM model.
+    - **Squim MOS**  *(CLI Identifier: `squim_mos`, Reference required, GPU preferred)*: estimation of subjective Mean Opinion Score (MOS) for speech enhancement from [Torchaudio](https://pytorch.org/audio/stable/tutorials/squim_tutorial.html).
 
 2. **Speech intelligibility**
 
@@ -167,8 +168,8 @@ Below is a list of the attributes available in ATTEST. Each attribute also has a
 
 ATTEST provides metrics that vary in language compatibility:
 
-- **Language-idependent metrics**: Metrics such as VDE, GPE, FFE, logF0 RMSE, and Squim family metrics (STOI, PESQ, SI-SDR) are language-independent, as they reflect properties unrelated to specific languages.
-- **Applicable to all languages**: Metrics like UTMOS, SpeechBERTScore, Speaker Similarity (ECAPA-TDNN) and Squim-metrics use components trained primarily on English data. However, since the metric reflects a language-independent property, it could generalize to audio in other languages.
+- **Language-idependent metrics**: Metrics such as VDE, GPE, FFE, logF0 RMSE are language-independent, as they reflect properties unrelated to specific languages.
+- **Applicable to all languages**: Metrics like UTMOS, SpeechBERTScore, Speaker Similarity (ECAPA-TDNN) and Squim family metrics (STOI, PESQ, SI-SDR, MOS) use components trained primarily on English data. However, since the metric reflects a language-independent property, it could generalize to audio in other languages.
 - **Language-specific metrics**:
   - CER, WER, Character distance: Limited to languages supported by [Whisper](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
   - PER, Phoneme distance: Limited to languages supported by both [Whisper](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10) and [Espeak](https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md).
