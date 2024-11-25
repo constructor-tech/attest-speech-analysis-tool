@@ -17,7 +17,6 @@
 #
 
 import os
-import time
 import whisper
 from whisper.tokenizer import TO_LANGUAGE_CODE
 
@@ -25,7 +24,7 @@ from attest.src.settings import get_settings
 from attest.src.model import Project
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 
 
 _whisper = None
@@ -45,24 +44,18 @@ settings = get_settings()
 class Whisper:
 
     def __init__(self):
-        self.logger = get_logger()
         self.model = None
         self.model_cache_dir = os.path.join(settings.MODELS_DIR, "whisper", settings.WHISPER_MODEL_NAME)
 
-    def get_model(self):
+    def load_model(self):
         if self.model is None:
-            start_time = time.time()
-            self.logger.info(f"Loading Whisper {settings.WHISPER_MODEL_NAME} model...")
-
+            tracker = PerformanceTracker(name=f"Loading Whisper {settings.WHISPER_MODEL_NAME} model", start=True)
             self.model = whisper.load_model(
                 settings.WHISPER_MODEL_NAME,
                 device=settings.DEVICE,
                 download_root=self.model_cache_dir,
             )
-
-            elapsed_time = time.time() - start_time
-            self.logger.info(f"Loaded Whisper {settings.WHISPER_MODEL_NAME} model in {elapsed_time:.2f} seconds")
-        return self.model
+            tracker.end()
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/whisper/transcriptions.pickle",
@@ -104,13 +97,11 @@ class Whisper:
         validator=validate_matching_to_project_size,
     )
     def infer_project(self, project: Project):
-        self.logger.info("Transcribing speech using Whisper model...")
+        self.load_model()
+
+        tracker = PerformanceTracker(name="Transcribing speech using Whisper model", start=True)
         results = []
-
-        self.get_model()  # init model
-
         for audio_file in project.audio_files:
-
             result = self.model.transcribe(
                 audio_file,
                 word_timestamps=True,
@@ -118,6 +109,6 @@ class Whisper:
                 language=TO_LANGUAGE_CODE[settings.WHISPER_LANGUAGE.lower()],
             )
             results.append(result)
+        tracker.end()
 
-        self.logger.info("Transcribing is done!")
         return results

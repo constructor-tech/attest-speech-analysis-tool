@@ -17,11 +17,11 @@
 #
 
 import os
-import time
 from typing import List
 
 from attest.src.settings import get_settings
 from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 
 
 # Initialize settings and logger
@@ -69,10 +69,9 @@ def load_project(project_id: str) -> Project:
     Raises:
         FileNotFoundError: If the project directory or filelist does not exist.
     """
-    start_time = time.time()
-
     project_path = os.path.join(settings.DATA_DIR, project_id)
-    logger.info(f"Loading project '{project_id}' from '{project_path}'...")
+
+    tracker = PerformanceTracker(name=f"Loading project '{project_id}' from '{project_path}'", start=True)
 
     # Ensure project directory exists
     if not os.path.exists(project_path):
@@ -91,8 +90,7 @@ def load_project(project_id: str) -> Project:
     with open(filelist_path, "r") as file:
         filelist = [line.strip().split("|") for line in file]
 
-    elapsed_time = time.time() - start_time
-    logger.info(f"Loaded project '{project_id}' in {elapsed_time:.2f} seconds.")
+    tracker.end()
 
     # Return the initialized Project object
     return Project(project_id, filelist, audio_dir=os.path.join(project_path, "wavs"))

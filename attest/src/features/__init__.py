@@ -20,10 +20,10 @@ from .features import (
     is_attribute,
     is_metric,
     is_reference_aware_metric,
-    is_non_reference_aware_metric,
+    is_reference_free_metric,
     is_feature,
     is_reference_aware_feature,
-    is_non_reference_aware_feature,
+    is_reference_free_feature,
     compute_reference_aware_feature,
-    compute_non_reference_aware_feature,
+    compute_reference_free_feature,
 )

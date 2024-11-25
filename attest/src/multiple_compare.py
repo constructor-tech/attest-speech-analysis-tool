@@ -17,9 +17,9 @@
 #
 
 from attest.src.features import (
-    is_non_reference_aware_metric,
+    is_reference_free_metric,
     is_reference_aware_feature,
-    compute_non_reference_aware_feature,
+    compute_reference_free_feature,
     compute_reference_aware_feature,
 )
 from attest.src.model import (
@@ -42,7 +42,7 @@ def multiple_compare(
     output = MultipleComparisonResult(projects=[ds.name for ds in projects], features=features)
 
     for feature_id, cache_filename in zip(features, cache_filenames):
-        if not (is_reference_aware_feature(feature_id) or is_non_reference_aware_metric(feature_id)):
+        if not (is_reference_aware_feature(feature_id) or is_reference_free_metric(feature_id)):
             continue
 
         feature_results = []
@@ -51,7 +51,7 @@ def multiple_compare(
             result = (
                 compute_reference_aware_feature(feature_id, project, projects[0], cache_filename)
                 if is_reference_aware_feature(feature_id)
-                else compute_non_reference_aware_feature(feature_id, project, cache_filename)
+                else compute_reference_free_feature(feature_id, project, cache_filename)
             )  # metric
             feature_results.append(result)
 

@@ -21,7 +21,6 @@
 
 import librosa
 import numpy as np
-import os
 import pickle
 import pysptk
 
@@ -30,7 +29,9 @@ from scipy import spatial
 
 from attest.src.settings import get_settings
 from attest.src.model import Project
-from attest.src.utils.logger import get_logger
+from attest.src.utils.caching_utils import CacheHandler
+from attest.src.utils.caching_validators import validate_matching_to_project_size
+from attest.src.utils.performance_tracker import PerformanceTracker
 from attest.src.utils.pitch_extractor import get_pitch_extractor
 
 
@@ -40,58 +41,41 @@ settings = get_settings()
 
 class PitchComparator:
 
-    def __init__(self):
-        self.logger = get_logger()
-
     def compare_for_projects(self, hyp_project: Project, ref_project: Project, key: str):
+        result = self._compare_for_projects(hyp_project, ref_project, settings.PITCH_EXTRACT_METHOD)
+        return [x[key] for x in result]
+
+
+    @CacheHandler(
+        cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch_comparator/{{3}}/${{2.name}}.pickle",
+        method="pickle",
+        validator=validate_matching_to_project_size,
+    )
+    def _compare_for_projects(self, hyp_project: Project, ref_project: Project, _pitch_extract_method: str):
+        pitch_extractor = get_pitch_extractor()
+        pitch_values_hyp = pitch_extractor.compute_pitch_values_for_project(hyp_project)
+        pitch_values_ref = pitch_extractor.compute_pitch_values_for_project(ref_project)
+
+        tracker = PerformanceTracker(name="Comparing pitch values", start=True)
         result = []
-
-        cache_file = os.path.join(
-            settings.CACHE_DIR,
-            hyp_project.name,
-            "pitch_comparator",
-            settings.PITCH_EXTRACT_METHOD,
-            f"{ref_project.name}.pickle",
-        )
-        if os.path.exists(cache_file):
-            self.logger.info('Found cached file with pitch comparison result: "%s"' % cache_file)
-            with open(cache_file, "rb") as f:
-                result = pickle.load(f)
-
-        if len(result) == len(hyp_project.audio_files):
-            self.logger.info("Used pitch comparison result from cache!")
-
-        else:
-            pitch_extractor = get_pitch_extractor()
-            pitch_values_hyp = pitch_extractor.compute_pitch_values_for_project(hyp_project)
-            pitch_values_ref = pitch_extractor.compute_pitch_values_for_project(ref_project)
-
-            result = []
-
-            self.logger.info("Comparing pitch values...")
-            for audio_ref, audio_syn, pitch_ref, pitch_syn in zip(
-                ref_project.audio_files,
-                hyp_project.audio_files,
-                pitch_values_ref,
-                pitch_values_hyp,
-            ):
-                result.append(
-                    self.compute_pitch_metrics(
-                        audio_ref=audio_ref,
-                        audio_syn=audio_syn,
-                        pitch_ref=pitch_ref,
-                        pitch_syn=pitch_syn,
-                    )
+        for audio_ref, audio_syn, pitch_ref, pitch_syn in zip(
+            ref_project.audio_files,
+            hyp_project.audio_files,
+            pitch_values_ref,
+            pitch_values_hyp,
+        ):
+            result.append(
+                self.compute_pitch_metrics(
+                    audio_ref=audio_ref,
+                    audio_syn=audio_syn,
+                    pitch_ref=pitch_ref,
+                    pitch_syn=pitch_syn,
                 )
-            self.logger.info("Comparing pitch values is done!")
-
-            os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-            with open(cache_file, "wb") as f:
-                pickle.dump(result, f)
-            self.logger.info('Pitch comparison result are saved to "%s"' % cache_file)
-
-        result = [x[key] for x in result]
+            )
+        tracker.end()
+        
         return result
+
 
     def compute_pitch_metrics(
         self,

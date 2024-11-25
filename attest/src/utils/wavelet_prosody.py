@@ -43,6 +43,7 @@ from wavelet_prosody_toolkit.prosody_tools import cwt_utils, loma, lab
 from attest.src.settings import get_settings
 from attest.src.model import Project
 from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 
 
 _wavelet_prosody_extractor = None
@@ -70,7 +71,7 @@ class WaveletProsodyExtractor:
     def extract_features_for_project(self, project: Project, word_alignments: list):
         features = []
 
-        self.logger.info("Creating wavelet prosody plots...")
+        tracker = PerformanceTracker(name="Creating wavelet prosody plots", start=True)
 
         configuration = defaultdict()
         with open(self.config_path, "r") as f:
@@ -87,7 +88,7 @@ class WaveletProsodyExtractor:
                 _ = _analysis(audio_file, word_ali, configuration, output_file)
             features.append({"image": output_file})
 
-        self.logger.info("Creating wavelet prosody plots is done!")
+        tracker.end()
 
         return features
 

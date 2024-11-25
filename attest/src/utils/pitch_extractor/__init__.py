@@ -41,4 +41,4 @@ def get_pitch_extractor() -> PitchExtractor:
         case "pyworld":
             return get_pyworld_pitch_extractor()
     logger.warning(f'Pitch extraction method "{settings.PITCH_EXTRACT_METHOD}" not implemented')
-    return get_torchcrepe_pitch_extractor()
+    return get_parselmouth_pitch_extractor()

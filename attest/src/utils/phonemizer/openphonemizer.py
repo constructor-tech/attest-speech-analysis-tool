@@ -16,8 +16,6 @@
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
 
-import time
-
 from typing import List
 from openphonemizer import OpenPhonemizer as BaseOpenPhonemizer
 
@@ -25,7 +23,7 @@ from attest.src.settings import get_settings
 from attest.src.model import Project
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 from .phonemizer import Phonemizer
 
 
@@ -46,15 +44,13 @@ settings = get_settings()
 class OpenPhonemizer(Phonemizer):
 
     def __init__(self):
-        self.logger = get_logger()
         self.model = None
 
     def load_model(self):
         if self.model is None:
-            start_time = time.time()
-            self.logger.info("Loading phonemizer model...")
+            tracker = PerformanceTracker(name="Loading openphonemizer model", start=True)
             self.model = BaseOpenPhonemizer()
-            self.logger.info("Loaded phonemizer model in %.2f seconds" % (time.time() - start_time))
+            tracker.end()
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/g2p/openphonemizer/phonemes.txt",
@@ -64,10 +60,10 @@ class OpenPhonemizer(Phonemizer):
     def phonemize_project(self, project: Project):
         self.load_model()
 
-        self.logger.info("Phonemizing texts...")
+        tracker = PerformanceTracker(name="Phonemizing texts using openphonemizer", start=True)
         phonemes = [self.model(text) for text in project.texts]
+        tracker.end()
 
-        self.logger.info("Phonemization is done, caching...")
         return phonemes
 
     @CacheHandler(
@@ -78,8 +74,8 @@ class OpenPhonemizer(Phonemizer):
     def phonemize_many(self, texts: List[str], cache_path: str):
         self.load_model()
 
-        self.logger.info("Phonemizing texts...")
+        tracker = PerformanceTracker(name="Phonemizing texts using openphonemizer", start=True)
         phonemes = [self.model(text) for text in texts]
+        tracker.end()
 
-        self.logger.info("Phonemization is done!")
         return phonemes

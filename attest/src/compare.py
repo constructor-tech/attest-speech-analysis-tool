@@ -19,7 +19,7 @@
 from attest.src.features import (
     is_reference_aware_feature,
     compute_reference_aware_feature,
-    compute_non_reference_aware_feature,
+    compute_reference_free_feature,
 )
 from attest.src.model import (
     load_project,
@@ -51,8 +51,8 @@ def compare(project1: str, project2: str, features: List[str], feature_params: D
             result1 = compute_reference_aware_feature(feature_id, project1, project2, cache_filename)
             result2 = compute_reference_aware_feature(feature_id, project2, project1, cache_filename)
         else:
-            result1 = compute_non_reference_aware_feature(feature_id, project1, cache_filename)
-            result2 = compute_non_reference_aware_feature(feature_id, project2, cache_filename)
+            result1 = compute_reference_free_feature(feature_id, project1, cache_filename)
+            result2 = compute_reference_free_feature(feature_id, project2, cache_filename)
 
         if result1 and result2:
             output.results[feature_id] = FeatureComparisonResult([result1, result2])

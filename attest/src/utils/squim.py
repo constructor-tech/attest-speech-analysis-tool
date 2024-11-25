@@ -17,15 +17,13 @@
 #
 
 import torch
-import torchaudio
-import torchaudio.functional as F
 from torchaudio.pipelines import SQUIM_OBJECTIVE, SQUIM_SUBJECTIVE
 
 from attest.src.settings import get_settings
 from attest.src.model import Project
+from attest.src.utils.audio_utils import load_audio_tensor
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
 from attest.src.utils.performance_tracker import PerformanceTracker
 
 
@@ -46,10 +44,10 @@ settings = get_settings()
 class SquimPredictor:
 
     def __init__(self):
-        self.logger = get_logger()
         self.objective_model = None
         self.subjective_model = None
         self.device = settings.DEVICE
+        self.sampling_rate = 16000
 
 
     def load_objective_model(self):
@@ -74,12 +72,14 @@ class SquimPredictor:
         validator=validate_matching_to_project_size,
     )
     def predict_project_subjective(self, hyp_project: Project, ref_project: Project):
-        scores = []
         self.load_subjective_model()
-        self.logger.info("Computing scores...")
+
+        tracker = PerformanceTracker(name="Computing squim subjective scores", start=True)
+        scores = []
         for audio_hyp_path, audio_ref_path in zip(hyp_project.audio_files, ref_project.audio_files):
             scores.append(self.predict_subjective(audio_hyp_path, audio_ref_path))
-        self.logger.info("Computing scores is done!")
+        tracker.end()
+        
         return [x for x in scores]
 
 
@@ -89,38 +89,31 @@ class SquimPredictor:
         validator=validate_matching_to_project_size,
     )
     def predict_project_objective(self, project: Project, key: str):
-        scores = []
         self.load_objective_model()
 
         tracker = PerformanceTracker(name="Computing squim objective scores", start=True)
+        scores = []
         for audio_path in project.audio_files:
             scores.append(self.predict_objective(audio_path))
         tracker.end()
+        
         return [x[key] for x in scores]
 
 
     def predict_subjective(self, audio_hyp_path, audio_ref_path):
-        wave_hyp, _ = self._load_audio(audio_hyp_path, 16000)
-        wave_ref, _ = self._load_audio(audio_ref_path, 16000)
+        audio_hyp, _ = load_audio_tensor(audio_hyp_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+        audio_ref, _ = load_audio_tensor(audio_ref_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
         with torch.no_grad():
-            mos = self.subjective_model(wave_hyp.to(self.device), wave_ref.to(self.device))
+            mos = self.subjective_model(audio_hyp, audio_ref)
         return mos.cpu().item()
 
 
     def predict_objective(self, audio_path):
-        wave, _ = self._load_audio(audio_path, 16000)
+        audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
         with torch.no_grad():
-            stoi, pesq, si_sdr = self.objective_model(wave.to(self.device))
+            stoi, pesq, si_sdr = self.objective_model(audio_tensor)
         return {
             "STOI": stoi.cpu().item(),
             "PESQ": pesq.cpu().item(),
             "SI-SDR": si_sdr.cpu().item(),
         }
-    
-
-    def _load_audio(self, audio_path, target_sr):
-        wave, sr = torchaudio.load(audio_path)
-        if sr != target_sr:
-            wave = F.resample(wave, sr, target_sr)
-        return wave, target_sr
-

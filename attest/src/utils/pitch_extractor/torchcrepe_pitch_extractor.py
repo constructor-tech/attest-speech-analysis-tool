@@ -23,7 +23,7 @@ from attest.src.settings import get_settings
 from attest.src.model import Project
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 from .pitch_extractor import PitchExtractor
 
 
@@ -45,45 +45,30 @@ class CrepePitchExtractor(PitchExtractor):
 
     def __init__(self, model_name):
         super().__init__()
-        self.logger = get_logger()
         self.hop_length_seconds = 1.0 / self.fps
         self.fmin = 50
         self.fmax = 550
-        self.model = model_name
+        self.model_name = model_name
         self.device = settings.DEVICE
         self.batch_size = 2048
 
+
+    def compute_pitch_values_for_project(self, project: Project):
+        return self._compute_pitch_values_for_project(project, self.model_name)
+
+
     @CacheHandler(
-        cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch/torchcrepe/values.pkl",
+        cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch/torchcrepe-{{2}}/values.pkl",
         method="pickle",
         validator=validate_matching_to_project_size,
     )
-    def compute_pitch_values_for_project(self, project: Project):
-        self.logger.info("Computing pitch values...")
-
-        if self.model == "full":
-            pitch_values = self.compute_pitch_values_for_project_model_full(project)
-        else:
-            pitch_values = self.compute_pitch_values_for_project_model_tiny(project)
-
-        self.logger.info("Computing pitch values is done!")
+    def _compute_pitch_values_for_project(self, project: Project, model_name):
+        tracker = PerformanceTracker(name=f"Computing pitch values using torchcrepe-{model_name}", start=True)
+        pitch_values = [self._compute_pitch_values(x) for x in project.audio_files]
+        tracker.end()
+        
         return pitch_values
 
-    @CacheHandler(
-        cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch/torchcrepe-tiny/values.pkl",
-        method="pickle",
-        validator=validate_matching_to_project_size,
-    )
-    def compute_pitch_values_for_project_model_tiny(self, project: Project):
-        return [self._compute_pitch_values(x) for x in project.audio_files]
-
-    @CacheHandler(
-        cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch/torchcrepe-full/values.pkl",
-        method="pickle",
-        validator=validate_matching_to_project_size,
-    )
-    def compute_pitch_values_for_project_model_full(self, project: Project):
-        return [self._compute_pitch_values(x) for x in project.audio_files]
 
     def _compute_pitch_values(self, audio_file: str):
         audio, sr = torchcrepe.load.audio(audio_file)
@@ -96,7 +81,7 @@ class CrepePitchExtractor(PitchExtractor):
             hop_length,
             self.fmin,
             self.fmax,
-            self.model,
+            self.model_name,
             batch_size=self.batch_size,
             device=self.device,
         )

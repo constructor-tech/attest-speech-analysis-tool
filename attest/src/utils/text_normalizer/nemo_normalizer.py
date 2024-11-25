@@ -17,12 +17,12 @@
 #
 
 import os
-import time
 from attest.src.settings import get_settings
 from attest.src.model import Project
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
 from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 
 
 settings = get_settings()
@@ -56,10 +56,10 @@ class NemoTextNormalizer:
         validator=validate_matching_to_project_size,
     )
     def normalize_project(self, project: Project):
-        self.logger.info("Normalizing texts...")
+        tracker = PerformanceTracker(name="Normalizing texts", start=True)
         normalized_texts = [self.normalize(text) for text in project.texts]
+        tracker.end()
 
-        self.logger.info("Text normalization is done")
         return normalized_texts
 
     def get_model(self, lang):
@@ -68,14 +68,11 @@ class NemoTextNormalizer:
             return None
 
         if lang not in self.models:
-            start_time = time.time()
             from nemo_text_processing.text_normalization.normalize import Normalizer
 
-            self.logger.info('Loading Text Normalization model for language "%s"...' % lang)
+            tracker = PerformanceTracker(name=f"Loading Text Normalization model for language '{lang}'", start=True)
             self.models[lang] = Normalizer(input_case="cased", lang=lang, cache_dir=self.model_cache_dir)
-            self.logger.info(
-                'Loaded Text Normalization model for language "%s" in %.2f seconds' % (lang, time.time() - start_time)
-            )
+            tracker.end()
 
         return self.models[lang]
 

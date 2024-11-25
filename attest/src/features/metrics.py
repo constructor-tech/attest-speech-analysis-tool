@@ -27,7 +27,7 @@ from attest.src.utils.edit_distance import (
     edit_distance_many,
     format_text_for_edit_distance,
 )
-from attest.src.utils.librosa_utils import (
+from attest.src.utils.audio_utils import (
     get_audio_duration,
     get_speech_duration,
     get_silence_begin,

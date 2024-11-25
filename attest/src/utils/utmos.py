@@ -16,16 +16,15 @@
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
 
-import librosa
 import os
-import time
 import torch
 
 from attest.src.settings import get_settings
 from attest.src.model import Project
+from attest.src.utils.audio_utils import load_audio_tensor
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 
 
 _predictor = None
@@ -45,20 +44,20 @@ settings = get_settings()
 class UTMOSPredictor:
 
     def __init__(self):
-        self.logger = get_logger()
         self.predictor = None
         self.model_cache_dir = os.path.join(settings.MODELS_DIR, "utmos")
         self.device = settings.DEVICE
+        self.sampling_rate = 16000
+
 
     def load_predictor(self):
         if self.predictor is None:
-            start_time = time.time()
-            self.logger.info("Loading utmos22_strong model...")
-
+            tracker = PerformanceTracker(name="Loading utmos22_strong model", start=True)
             torch.hub.set_dir(self.model_cache_dir)
             self.predictor = torch.hub.load("tarepan/SpeechMOS:v1.2.0", "utmos22_strong", trust_repo=True)
             self.predictor.to(self.device)
-            self.logger.info("Loaded utmos22_strong model in %.2f seconds" % (time.time() - start_time))
+            tracker.end()
+
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/utmos/utmos_scores.pickle",
@@ -66,17 +65,19 @@ class UTMOSPredictor:
         validator=validate_matching_to_project_size,
     )
     def predict_project(self, project: Project):
-        scores = []
         self.load_predictor()
-        self.logger.info("Computing scores...")
+
+        tracker = PerformanceTracker(name="Computing utmos scores", start=True)
+        scores = []
         for audio_path in project.audio_files:
             scores.append(self.predict(audio_path))
-        self.logger.info("Computing scores is done!")
+        tracker.end()
+
         return scores
 
+
     def predict(self, audio_path):
-        wave, sr = librosa.load(audio_path, sr=None)
+        audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
         with torch.no_grad():
-            x = torch.from_numpy(wave).unsqueeze(0).to(self.device)
-            score = self.predictor(x, sr)
+            score = self.predictor(audio_tensor, self.sampling_rate)
         return score.item()

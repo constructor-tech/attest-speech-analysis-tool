@@ -22,7 +22,7 @@ from attest.src.settings import get_settings
 from attest.src.model import Project
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 from phoneme_tokenizer import PhonemeTokenizer  # third_party
 from .phonemizer import Phonemizer
 
@@ -157,7 +157,6 @@ TO_LANGUAGE_CODE = {
 class EspeakPhonemizer(Phonemizer):
 
     def __init__(self):
-        self.logger = get_logger()
         lang = settings.ESPEAK_LANGUAGE
         if lang == "English":
             g2p_type = "espeak_ng_english_us_vits"
@@ -171,12 +170,10 @@ class EspeakPhonemizer(Phonemizer):
         validator=validate_matching_to_project_size,
     )
     def phonemize_project(self, project: Project):
-        phonemes = []
-
-        self.logger.info("Phonemizing texts...")
+        tracker = PerformanceTracker(name="Phonemizing texts using espeak-phonemizer", start=True)
         phonemes = [self.phonemize(text) for text in project.texts]
+        tracker.end()
 
-        self.logger.info("Phonemization is done, caching...")
         return phonemes
 
     @CacheHandler(
@@ -185,11 +182,9 @@ class EspeakPhonemizer(Phonemizer):
         validator=validate_matching_to_project_size,
     )
     def phonemize_many(self, texts: List[str], cache_path: str):
-        phonemes = []
-
-        for text in texts:
-            phonemes.append(self.phonemize(text))
-        self.logger.info("Phonemization is done!")
+        tracker = PerformanceTracker(name="Phonemizing texts using espeak-phonemizer", start=True)
+        phonemes = [self.phonemize(text) for text in texts]
+        tracker.end()
 
         return phonemes
 

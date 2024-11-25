@@ -17,16 +17,14 @@
 #
 
 import os
-import time
-import torchaudio
-
 from speechbrain.pretrained import EncoderClassifier
 
 from attest.src.settings import get_settings
 from attest.src.model import Project
+from attest.src.utils.audio_utils import load_audio_tensor
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 from .speaker_embedder import SpeakerEmbedder
 
 
@@ -47,25 +45,21 @@ settings = get_settings()
 class ECAPAEmbedder(SpeakerEmbedder):
 
     def __init__(self):
-        self.logger = get_logger()
         self.model = None
         self.model_name = "spkrec-ecapa-voxceleb"
         self.model_cache_dir = os.path.join(settings.MODELS_DIR, "speaker_embeddings/spkrec-ecapa-voxceleb")
-        self.sampling_rate = 16_000
+        self.sampling_rate = 16000
         self.device = settings.DEVICE
 
-    def get_model(self):
+    def load_model(self):
         if self.model is None:
-            start_time = time.time()
-            self.logger.info("Loading spkrec-ecapa-voxceleb model...")
-
+            tracker = PerformanceTracker(name="Loading spkrec-ecapa-voxceleb model", start=True)
             self.model = EncoderClassifier.from_hparams(
                 source="speechbrain/spkrec-ecapa-voxceleb",
                 savedir=self.model_cache_dir,
                 run_opts={"device": self.device},
             )
-            self.logger.info("Loaded spkrec-ecapa-voxceleb model in %.2f seconds" % (time.time() - start_time))
-        return self.model
+            tracker.end()
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/speaker_embeddings/ecapa_embeddings.pt",
@@ -73,16 +67,16 @@ class ECAPAEmbedder(SpeakerEmbedder):
         validator=validate_matching_to_project_size,
     )
     def extract_embeddings_for_project(self, project: Project):
-        self.logger.info("Extracting speaker embeddings...")
+        self.load_model()
+
+        tracker = PerformanceTracker(name="Extracting speaker embeddings", start=True)
         embeddings = []
-
-        for x in project.audio_files:
-            signal, sr = torchaudio.load(x)
-            signal = torchaudio.functional.resample(signal, orig_freq=sr, new_freq=self.sampling_rate)
-            embedding = self.get_model().encode_batch(signal)[0][0].cpu()
+        for audio_path in project.audio_files:
+            audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+            embedding = self.model.encode_batch(audio_tensor)[0][0].cpu()
             embeddings.append(embedding)
+        tracker.end()
 
-        self.logger.info("Extracting speaker embeddings is done!")
         return embeddings
 
     def compute_similarity(self, x, y):

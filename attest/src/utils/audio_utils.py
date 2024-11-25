@@ -17,7 +17,28 @@
 #
 
 import librosa
+import torchaudio
 from functools import lru_cache
+
+
+def load_audio_tensor(audio_file, target_sr=None, target_channels=1, device='cpu'):
+    audio, sr = torchaudio.load(audio_file)
+    
+    # Mix to mono if necessary
+    if audio.shape[0] > 1 and target_channels == 1:
+        audio = audio.mean(dim=0, keepdim=True)
+    
+    # Expand channels if necessary
+    if audio.shape[0] == 1 and target_channels == 2:
+        audio = audio.expand(target_channels, audio.shape[1])
+
+    # Resample if necessary
+    if target_sr is not None and sr != target_sr:
+        audio = torchaudio.functional.resample(audio, orig_freq=sr, new_freq=target_sr)
+        sr = target_sr
+
+    audio = audio.to(device)
+    return audio, sr
 
 
 @lru_cache(None)
@@ -29,19 +50,11 @@ def _get_audio_attributes(file_path):
     silence_begin = float(index[0] / sr)
     silence_end = float((y.shape[0] - index[1]) / sr)
     return {
-        # TODO @od 25.10.2023: keep all audios in cache is costly
-        # "y": y,
-        # "sr": sr,
         "duration": duration,
         "duration_speech": duration_speech,
         "silence_begin": silence_begin,
         "silence_end": silence_end,
     }
-
-
-def load_audio(file_path):
-    attributes = _get_audio_attributes(file_path)
-    return attributes["y"], attributes["sr"]
 
 
 def get_audio_duration(file_path):

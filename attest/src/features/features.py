@@ -16,7 +16,6 @@
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
 
-import time
 from typing import Union
 
 from attest.src.settings import get_settings
@@ -27,6 +26,7 @@ from attest.src.utils.caching_validators import (
     validate_reference_aware_feature_from_cache,
 )
 from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 from .attributes import get_attribute_id_to_method
 from .metrics import get_metric_id_to_method
 from .reference_aware_metrics import get_reference_aware_metric_id_to_method
@@ -38,20 +38,20 @@ settings = get_settings()
 
 _attribute_id_to_method = get_attribute_id_to_method()
 _reference_aware_metric_id_to_method = get_reference_aware_metric_id_to_method()
-_non_reference_aware_metric_id_to_method = get_metric_id_to_method()
+_reference_free_metric_id_to_method = get_metric_id_to_method()
 _metric_id_to_method = {
     **_reference_aware_metric_id_to_method,
-    **_non_reference_aware_metric_id_to_method,
+    **_reference_free_metric_id_to_method,
 }
 _reference_aware_feature_id_to_method = _reference_aware_metric_id_to_method
-_non_reference_aware_feature_id_to_method = {
+_reference_free_feature_id_to_method = {
     **_attribute_id_to_method,
-    **_non_reference_aware_metric_id_to_method,
+    **_reference_free_metric_id_to_method,
 }
 _feature_id_to_method = {
     **_attribute_id_to_method,
     **_reference_aware_metric_id_to_method,
-    **_non_reference_aware_metric_id_to_method,
+    **_reference_free_metric_id_to_method,
 }
 
 
@@ -67,8 +67,8 @@ def is_reference_aware_metric(feature_id: str) -> bool:
     return feature_id in _reference_aware_metric_id_to_method
 
 
-def is_non_reference_aware_metric(feature_id: str) -> bool:
-    return feature_id in _non_reference_aware_metric_id_to_method
+def is_reference_free_metric(feature_id: str) -> bool:
+    return feature_id in _reference_free_metric_id_to_method
 
 
 def is_feature(feature_id: str) -> bool:
@@ -79,8 +79,8 @@ def is_reference_aware_feature(feature_id: str) -> bool:
     return feature_id in _reference_aware_feature_id_to_method
 
 
-def is_non_reference_aware_feature(feature_id: str) -> bool:
-    return feature_id in _non_reference_aware_feature_id_to_method
+def is_reference_free_feature(feature_id: str) -> bool:
+    return feature_id in _reference_free_feature_id_to_method
 
 
 @CacheHandler(
@@ -88,21 +88,19 @@ def is_non_reference_aware_feature(feature_id: str) -> bool:
     method="pickle",
     validator=validate_feature_from_cache,
 )
-def compute_non_reference_aware_feature(
+def compute_reference_free_feature(
     feature_id: str, project: Project, cache_filename: str
 ) -> Union[AttributeResult, MetricResult]:
-    logger.info('Computing feature "%s" for project "%s"...' % (feature_id, project.name))
+    tracker = PerformanceTracker(name=f'Computing feature "{feature_id}" for project "{project.name}"', start=True)
 
-    start_time = time.time()
-    feature = _non_reference_aware_feature_id_to_method.get(feature_id)
+    feature = _reference_free_feature_id_to_method.get(feature_id)
     if feature is None:
         logger.info('Unknown feature "%s", skipping.' % feature_id)
         return None
 
     feature_result = feature(project)
-    end_time = time.time()
-    logger.info('Computation time for feature "%s": %.2f seconds.' % (feature_id, end_time - start_time))
 
+    tracker.end()
     return feature_result
 
 
@@ -114,19 +112,15 @@ def compute_non_reference_aware_feature(
 def compute_reference_aware_feature(
     feature_id: str, hyp_project: Project, ref_project: Project, cache_filename: str
 ) -> Union[AttributeResult, MetricResult]:
-    logger.info(
-        'Computing feature "%s" for projects "%s" (hyp), "%s" (ref)...'
-        % (feature_id, hyp_project.name, ref_project.name)
-    )
+    print(1, settings.PITCH_EXTRACT_METHOD)
+    tracker = PerformanceTracker(name=f'Computing feature "{feature_id}" for projects "{hyp_project.name}" (hyp), "{ref_project.name}" (ref)', start=True)
 
-    start_time = time.time()
     feature = _reference_aware_feature_id_to_method.get(feature_id)
     if feature is None:
         logger.info('Unknown feature "%s", skipping.' % feature_id)
         return None
 
     feature_result = feature(hyp_project, ref_project)
-    end_time = time.time()
-    logger.info('Computation time for feature "%s": %.2f seconds.' % (feature_id, end_time - start_time))
-
+    
+    tracker.end()
     return feature_result

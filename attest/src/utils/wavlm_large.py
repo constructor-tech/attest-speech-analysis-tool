@@ -16,17 +16,16 @@
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
 
-import librosa
 import os
-import time
 import torch
 from transformers import WavLMModel
 
 from attest.src.settings import get_settings
 from attest.src.model import Project
+from attest.src.utils.audio_utils import load_audio_tensor
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 
 
 _wavlm_large = None
@@ -46,25 +45,19 @@ settings = get_settings()
 class WavLMLarge:
 
     def __init__(self):
-        self.logger = get_logger()
         self.model = None
-        # TODO: should settings.WAVLM_MODEL_NAME be hardcoded here? or rename WavLMLarge -> WavLM?
         self.model_cache_dir = os.path.join(settings.MODELS_DIR, "wavlm", settings.WAVLM_MODEL_NAME)
-        self.sampling_rate = 16_000
+        self.sampling_rate = 16000
         self.device = settings.DEVICE
 
-    def get_model(self):
+    def load_model(self):
         if self.model is None:
-            start_time = time.time()
-            self.logger.info("Loading wavlm-large model...")
-
+            tracker = PerformanceTracker(name="Loading wavlm-large model", start=True)
             self.model = WavLMModel.from_pretrained(
                 settings.WAVLM_MODEL_NAME,
                 cache_dir=self.model_cache_dir,
             ).to(self.device)
-
-            self.logger.info("Loaded wavlm-large model in %.2f seconds" % (time.time() - start_time))
-        return self.model
+            tracker.end()
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/wavlm_large_features_layer_${{2}}/features.pt",
@@ -72,23 +65,15 @@ class WavLMLarge:
         validator=validate_matching_to_project_size,
     )
     def extract_features_for_project(self, project: Project, layer: int = -1):
-        self.logger.info("Extracting WavLM features...")
+        self.load_model()
+
+        tracker = PerformanceTracker(name="Extracting WavLM features", start=True)
         features = []
-
-        self.get_model()  # init model
-
         with torch.no_grad():
-            for x in project.audio_files:
-
-                signal, sr = librosa.load(x, sr=None)
-                if sr != self.sampling_rate:
-                    signal = librosa.resample(signal, orig_sr=sr, target_sr=self.sampling_rate)
-
-                signal = torch.from_numpy(signal).unsqueeze(0).to(self.model.device).float()
-
-                feats = self.model(signal, output_hidden_states=True).hidden_states[layer]
-
+            for audio_path in project.audio_files:
+                audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+                feats = self.model(audio_tensor, output_hidden_states=True).hidden_states[layer]
                 features.append(feats.squeeze(0).cpu())
+        tracker.end()
 
-        self.logger.info("Extracting WavLM features is done!")
         return features

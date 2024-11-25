@@ -24,7 +24,7 @@ from attest.src.settings import get_settings
 from attest.src.model import Project
 from attest.src.utils.caching_utils import CacheHandler
 from attest.src.utils.caching_validators import validate_matching_to_project_size
-from attest.src.utils.logger import get_logger
+from attest.src.utils.performance_tracker import PerformanceTracker
 from .pitch_extractor import PitchExtractor
 
 
@@ -46,7 +46,6 @@ class ParselmouthPitchExtractor(PitchExtractor):
 
     def __init__(self):
         super().__init__()
-        self.logger = get_logger()
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch/parselmouth/values.pkl",
@@ -54,18 +53,16 @@ class ParselmouthPitchExtractor(PitchExtractor):
         validator=validate_matching_to_project_size,
     )
     def compute_pitch_values_for_project(self, project: Project):
-        pitch_values = []
-
-        self.logger.info("Computing pitch values...")
-        for x in project.audio_files:
-            pitch_values.append(self._compute_pitch_values(x))
-        self.logger.info("Computing pitch values is done!")
+        tracker = PerformanceTracker(name="Computing pitch values using praat-parselmouth", start=True)
+        pitch_values = [self._compute_pitch_values(x) for x in project.audio_files]
+        tracker.end()
 
         return pitch_values
 
     def _compute_pitch_values(self, audio_file: str):
         wav, sr = librosa.load(audio_file, sr=None)
-        pitch = self._compute_pitch(wav, sr, len(wav) // (sr / self.fps))
+        n_points = len(wav) // (sr / self.fps)
+        pitch = self._compute_pitch(wav, sr, n_points)
         pitch = self._remove_outliers(pitch)
         pitch[pitch == 0] = np.nan
         return pitch
@@ -86,7 +83,6 @@ class ParselmouthPitchExtractor(PitchExtractor):
         return pitch
 
     def _remove_outliers(self, pitch_array):
-        # TODO @od 25.10.2023: Code duplicated in pitch_comparator.py
         pitch_mean = np.mean(pitch_array[pitch_array != 0])
         i = 0
         n = len(pitch_array)
