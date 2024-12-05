@@ -72,7 +72,9 @@ class ECAPAEmbedder(SpeakerEmbedder):
         tracker = PerformanceTracker(name="Extracting speaker embeddings", start=True)
         embeddings = []
         for audio_path in project.audio_files:
-            audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+            audio_tensor, _ = load_audio_tensor(
+                audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device
+            )
             embedding = self.model.encode_batch(audio_tensor)[0][0].cpu()
             embeddings.append(embedding)
         tracker.end()

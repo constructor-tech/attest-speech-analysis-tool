@@ -49,7 +49,6 @@ class SquimPredictor:
         self.device = settings.DEVICE
         self.sampling_rate = 16000
 
-
     def load_objective_model(self):
         if self.objective_model is None:
             tracker = PerformanceTracker(name="Loading squim objective model", start=True)
@@ -57,14 +56,12 @@ class SquimPredictor:
             self.objective_model.to(self.device)
             tracker.end()
 
-
     def load_subjective_model(self):
         if self.subjective_model is None:
             tracker = PerformanceTracker(name="Loading squim subjective model", start=True)
             self.subjective_model = SQUIM_SUBJECTIVE.get_model()
             self.subjective_model.to(self.device)
             tracker.end()
-
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/squim/squim_subjective_scores.pickle",
@@ -79,9 +76,8 @@ class SquimPredictor:
         for audio_hyp_path, audio_ref_path in zip(hyp_project.audio_files, ref_project.audio_files):
             scores.append(self.predict_subjective(audio_hyp_path, audio_ref_path))
         tracker.end()
-        
-        return [x for x in scores]
 
+        return [x for x in scores]
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/squim/squim_objective_scores.pickle",
@@ -96,20 +92,24 @@ class SquimPredictor:
         for audio_path in project.audio_files:
             scores.append(self.predict_objective(audio_path))
         tracker.end()
-        
+
         return [x[key] for x in scores]
 
-
     def predict_subjective(self, audio_hyp_path, audio_ref_path):
-        audio_hyp, _ = load_audio_tensor(audio_hyp_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
-        audio_ref, _ = load_audio_tensor(audio_ref_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+        audio_hyp, _ = load_audio_tensor(
+            audio_hyp_path, target_sr=self.sampling_rate, target_channels=1, device=self.device
+        )
+        audio_ref, _ = load_audio_tensor(
+            audio_ref_path, target_sr=self.sampling_rate, target_channels=1, device=self.device
+        )
         with torch.no_grad():
             mos = self.subjective_model(audio_hyp, audio_ref)
         return mos.cpu().item()
 
-
     def predict_objective(self, audio_path):
-        audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+        audio_tensor, _ = load_audio_tensor(
+            audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device
+        )
         with torch.no_grad():
             stoi, pesq, si_sdr = self.objective_model(audio_tensor)
         return {

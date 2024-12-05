@@ -49,7 +49,6 @@ class UTMOSPredictor:
         self.device = settings.DEVICE
         self.sampling_rate = 16000
 
-
     def load_predictor(self):
         if self.predictor is None:
             tracker = PerformanceTracker(name="Loading utmos22_strong model", start=True)
@@ -57,7 +56,6 @@ class UTMOSPredictor:
             self.predictor = torch.hub.load("tarepan/SpeechMOS:v1.2.0", "utmos22_strong", trust_repo=True)
             self.predictor.to(self.device)
             tracker.end()
-
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/utmos/utmos_scores.pickle",
@@ -75,9 +73,10 @@ class UTMOSPredictor:
 
         return scores
 
-
     def predict(self, audio_path):
-        audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+        audio_tensor, _ = load_audio_tensor(
+            audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device
+        )
         with torch.no_grad():
             score = self.predictor(audio_tensor, self.sampling_rate)
         return score.item()

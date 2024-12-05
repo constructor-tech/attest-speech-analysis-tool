@@ -19,6 +19,7 @@
 import time
 from attest.src.utils.logger import get_logger
 
+
 class PerformanceTracker:
     def __init__(self, name: str = "", start: bool = False):
         self.name = name

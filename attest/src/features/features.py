@@ -113,7 +113,10 @@ def compute_reference_aware_feature(
     feature_id: str, hyp_project: Project, ref_project: Project, cache_filename: str
 ) -> Union[AttributeResult, MetricResult]:
     print(1, settings.PITCH_EXTRACT_METHOD)
-    tracker = PerformanceTracker(name=f'Computing feature "{feature_id}" for projects "{hyp_project.name}" (hyp), "{ref_project.name}" (ref)', start=True)
+    tracker = PerformanceTracker(
+        name=f'Computing feature "{feature_id}" for projects "{hyp_project.name}" (hyp), "{ref_project.name}" (ref)',
+        start=True,
+    )
 
     feature = _reference_aware_feature_id_to_method.get(feature_id)
     if feature is None:
@@ -121,6 +124,6 @@ def compute_reference_aware_feature(
         return None
 
     feature_result = feature(hyp_project, ref_project)
-    
+
     tracker.end()
     return feature_result

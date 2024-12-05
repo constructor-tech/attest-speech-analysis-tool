@@ -52,10 +52,8 @@ class CrepePitchExtractor(PitchExtractor):
         self.device = settings.DEVICE
         self.batch_size = 2048
 
-
     def compute_pitch_values_for_project(self, project: Project):
         return self._compute_pitch_values_for_project(project, self.model_name)
-
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch/torchcrepe-{{2}}/values.pkl",
@@ -66,9 +64,8 @@ class CrepePitchExtractor(PitchExtractor):
         tracker = PerformanceTracker(name=f"Computing pitch values using torchcrepe-{model_name}", start=True)
         pitch_values = [self._compute_pitch_values(x) for x in project.audio_files]
         tracker.end()
-        
-        return pitch_values
 
+        return pitch_values
 
     def _compute_pitch_values(self, audio_file: str):
         audio, sr = torchcrepe.load.audio(audio_file)

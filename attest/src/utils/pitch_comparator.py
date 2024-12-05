@@ -21,7 +21,6 @@
 
 import librosa
 import numpy as np
-import pickle
 import pysptk
 
 from fastdtw import fastdtw
@@ -44,7 +43,6 @@ class PitchComparator:
     def compare_for_projects(self, hyp_project: Project, ref_project: Project, key: str):
         result = self._compare_for_projects(hyp_project, ref_project, settings.PITCH_EXTRACT_METHOD)
         return [x[key] for x in result]
-
 
     @CacheHandler(
         cache_path_template=f"{settings.CACHE_DIR}/${{1.name}}/pitch_comparator/{{3}}/${{2.name}}.pickle",
@@ -73,9 +71,8 @@ class PitchComparator:
                 )
             )
         tracker.end()
-        
-        return result
 
+        return result
 
     def compute_pitch_metrics(
         self,

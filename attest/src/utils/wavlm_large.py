@@ -71,7 +71,9 @@ class WavLMLarge:
         features = []
         with torch.no_grad():
             for audio_path in project.audio_files:
-                audio_tensor, _ = load_audio_tensor(audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device)
+                audio_tensor, _ = load_audio_tensor(
+                    audio_path, target_sr=self.sampling_rate, target_channels=1, device=self.device
+                )
                 feats = self.model(audio_tensor, output_hidden_states=True).hidden_states[layer]
                 features.append(feats.squeeze(0).cpu())
         tracker.end()

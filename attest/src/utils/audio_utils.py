@@ -21,13 +21,13 @@ import torchaudio
 from functools import lru_cache
 
 
-def load_audio_tensor(audio_file, target_sr=None, target_channels=1, device='cpu'):
+def load_audio_tensor(audio_file, target_sr=None, target_channels=1, device="cpu"):
     audio, sr = torchaudio.load(audio_file)
-    
+
     # Mix to mono if necessary
     if audio.shape[0] > 1 and target_channels == 1:
         audio = audio.mean(dim=0, keepdim=True)
-    
+
     # Expand channels if necessary
     if audio.shape[0] == 1 and target_channels == 2:
         audio = audio.expand(target_channels, audio.shape[1])
