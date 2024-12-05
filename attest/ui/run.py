@@ -18,8 +18,9 @@
 
 import streamlit as st
 from attest.src import evaluate, compare, multiple_compare
-import attest.ui.view_constants as vc
+import attest.ui.constants as vc
 from attest.ui.model import (
+    parse_result,
     UIErrorResult,
     UIEvaluationResult,
     UIComparisonResult,
@@ -27,79 +28,61 @@ from attest.ui.model import (
 )
 from attest.ui.settings import get_settings
 from attest.ui.view import View
-from attest.ui.utils import get_logger
+from attest.ui.utils.general_utils import get_logger
 
 
 def init_session_state():
-    if "tab" not in st.session_state:
-        st.session_state.tab = vc.SETTINGS_TAB
+    """
+    Initializes session state with default values.
+    """
+    defaults = {
+        "tab": vc.CONFIGURATION_TAB,
+        "project_id": None,
+        "features": [],
+        "feature_params": {},
+        "result": None,
+        "parsed_result": None,
+        "num_detailed_elements": 1,
+        "method": vc.EVALUATE_METHOD,
+        "selected_method": st.session_state.method if "method" in st.session_state else vc.EVALUATE_METHOD,
+        "group": vc.EMPTY_GROUP_LABEL,
+        "selected_group": st.session_state.group if "group" in st.session_state else vc.EMPTY_GROUP_LABEL,
+        "num_projects": 0,
+        "selected_num_projects": st.session_state.num_projects if "num_projects" in st.session_state else 0,
+        "pitch_extract_method": "parselmouth",
+        "selected_pitch_extract_method": (
+            st.session_state.pitch_extract_method if "pitch_extract_method" in st.session_state else "parselmouth"
+        ),
+        "text_norm_method": "None",
+        "selected_text_norm_method": (
+            st.session_state.text_norm_method if "text_norm_method" in st.session_state else "None"
+        ),
+        "phonemization_method": "openphonemizer",
+        "selected_phonemization_method": (
+            st.session_state.phonemization_method if "phonemization_method" in st.session_state else "openphonemizer"
+        ),
+        "whisper_language": "English",
+        "selected_whisper_language": (
+            st.session_state.whisper_language if "whisper_language" in st.session_state else "English"
+        ),
+        "espeak_language": "English",
+        "selected_espeak_language": (
+            st.session_state.espeak_language if "espeak_language" in st.session_state else "English"
+        ),
+    }
 
-    if "project_id" not in st.session_state:
-        st.session_state.project_id = None
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
-    if "features" not in st.session_state:
-        st.session_state.features = []
-
-    if "feature_params" not in st.session_state:
-        st.session_state.feature_params = {}
-
-    if "result" not in st.session_state:
-        st.session_state.result = None
-
-    if "parsed_result" not in st.session_state:
-        st.session_state.parsed_result = None
-
-    if "method" not in st.session_state:
-        st.session_state.method = vc.EVALUATE_METHOD
-
-    if "selected_method" not in st.session_state:
-        st.session_state.selected_method = st.session_state.method
-
-    if "group" not in st.session_state:
-        st.session_state.group = vc.EMPTY_GROUP_LABEL
-
-    if "selected_group" not in st.session_state:
-        st.session_state.selected_group = st.session_state.group
-
-    if "num_projects" not in st.session_state:
-        st.session_state.num_projects = 0
-
-    if "selected_num_projects" not in st.session_state:
-        st.session_state.selected_num_projects = st.session_state.num_projects
-
+    # Dynamically initialize project-related session state variables
     for i in range(st.session_state.num_projects):
-        if f"selected_project_{i}" not in st.session_state:
-            st.session_state[f"selected_project_{i}"] = st.session_state[f"project_{i}"]
-
-    if "pitch_extract_method" not in st.session_state:
-        st.session_state.pitch_extract_method = "parselmouth"
-
-    if "selected_pitch_extract_method" not in st.session_state:
-        st.session_state.selected_pitch_extract_method = st.session_state.pitch_extract_method
-
-    if "text_norm_method" not in st.session_state:
-        st.session_state.text_norm_method = "None"
-
-    if "selected_text_norm_method" not in st.session_state:
-        st.session_state.selected_text_norm_method = st.session_state.text_norm_method
-
-    if "phonemization_method" not in st.session_state:
-        st.session_state.phonemization_method = "openphonemizer"
-
-    if "selected_phonemization_method" not in st.session_state:
-        st.session_state.selected_phonemization_method = st.session_state.phonemization_method
-
-    if "whisper_language" not in st.session_state:
-        st.session_state.whisper_language = "English"
-
-    if "selected_whisper_language" not in st.session_state:
-        st.session_state.selected_whisper_language = st.session_state.whisper_language
-
-    if "espeak_language" not in st.session_state:
-        st.session_state.espeak_language = "English"
-
-    if "selected_espeak_language" not in st.session_state:
-        st.session_state.selected_espeak_language = st.session_state.espeak_language
+        project_key = f"project_{i}"
+        selected_project_key = f"selected_project_{i}"
+        if selected_project_key not in st.session_state:
+            st.session_state[selected_project_key] = (
+                st.session_state[project_key] if project_key in st.session_state else None
+            )
 
 
 def get_projects():
@@ -146,7 +129,6 @@ if __name__ == "__main__":
                     features=settings.FEATURES,
                     feature_params=feature_params,
                 )
-                st.session_state.parsed_result = UIEvaluationResult.parse(st.session_state.result)
 
             elif st.session_state.method == vc.COMPARE_METHOD:
                 st.session_state.result = compare(
@@ -155,7 +137,6 @@ if __name__ == "__main__":
                     features=settings.FEATURES,
                     feature_params=feature_params,
                 )
-                st.session_state.parsed_result = UIComparisonResult.parse(st.session_state.result)
 
             elif st.session_state.method == vc.COMPARE_MULTIPLE_METHOD:
                 st.session_state.result = multiple_compare(
@@ -163,8 +144,8 @@ if __name__ == "__main__":
                     features=settings.FEATURES,
                     feature_params=feature_params,
                 )
-                st.session_state.parsed_result = UIMultipleComparisonResult.parse(st.session_state.result)
 
+            st.session_state.parsed_result = parse_result(st.session_state.method, st.session_state.result)
             st.session_state.project_id = current_project_id
             st.session_state.features = settings.FEATURES
             st.session_state.feature_params = feature_params
@@ -173,7 +154,7 @@ if __name__ == "__main__":
             error_msg = vc.FILE_NOT_FOUND(e)
             st.session_state.parsed_result = UIErrorResult(error_msg)
 
-    if st.session_state.tab == vc.SETTINGS_TAB:
+    if st.session_state.tab == vc.CONFIGURATION_TAB:
         view.display_settings()
 
     elif isinstance(st.session_state.parsed_result, UIErrorResult):

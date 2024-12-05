@@ -19,7 +19,7 @@
 PROJECT_TITLE = "ATTEST"
 
 HOME_TAB = "Home"
-SETTINGS_TAB = "Settings"
+CONFIGURATION_TAB = "Settings"
 
 EXPORT_LABEL = "**Export**"
 EXPORT_BUTTON_LABEL = "Download Metrics as Json"

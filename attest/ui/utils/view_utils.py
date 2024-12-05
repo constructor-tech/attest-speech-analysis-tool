@@ -15,11 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 import streamlit as st
+
+from PIL import Image
+
+import attest.ui.constants as vc
 
 
 def display_plot(st_object, plot, figsize, fontsize):
@@ -75,6 +79,40 @@ def display_correlation_plot(feature1_id, feature2_id, feature1_values, feature2
     st.write(f"Correlation Coefficient: {corr_coef:.3f}")
 
 
+def display_detailed_fetuare(feature_label: str, feature, is_metric: bool, container):
+    if is_metric:
+        # metric
+        container.write(f"*{feature_label.upper()}*: {feature.score:.3f}")
+    else:
+        # attribute
+        if feature.message:
+            container.write(f"*{feature_label.upper()}*: {feature.message}")
+
+        not_found_message = f"**{vc.WARNING_LABEL}**: {feature_label} {vc.NOT_FOUND_MESSAGE}"
+
+        if feature.audio_path:
+            if os.path.exists(feature.audio_path):
+                container.audio(feature.audio_path)
+            else:
+                container.write(not_found_message)
+
+        if feature.image_path:
+            if os.path.exists(feature.image_path):
+                image = Image.open(feature.image_path)
+                container.image(image, caption=feature.image_path)
+            else:
+                container.write(not_found_message)
+
+        if feature.video_path:
+            if os.path.exists(feature.video_path):
+                container.video(feature.video_path)
+            else:
+                container.write(not_found_message)
+
+        if feature.plot_data:
+            display_plot(container, feature.plot_data, figsize=(8, 5), fontsize=6)
+
+
 def convert_to_table(array2d):
     table_html = "<table>"
     for row in array2d:
@@ -101,3 +139,30 @@ def dataframe_to_markdown(df):
 
 def dataframe_to_latex(df):
     return df.to_latex(index=False)
+
+
+def toggle_features(settings, enable=True):
+    if enable:
+        settings.FEATURES = [feature for _, cat_features in settings.ALL_FEATURES for _, feature, _, _ in cat_features]
+    else:
+        settings.FEATURES = []
+
+
+def handle_tab_change(session_state):
+    if session_state.tab == vc.HOME_TAB:
+        session_state.method = session_state.selected_method
+        session_state.group = session_state.selected_group
+        session_state.num_projects = session_state.selected_num_projects
+        for i in range(session_state.num_projects):
+            session_state[f"project_{i}"] = session_state[f"selected_project_{i}"]
+        session_state.pitch_extract_method = session_state.selected_pitch_extract_method
+        session_state.text_norm_method = session_state.selected_text_norm_method
+        session_state.phonemization_method = session_state.selected_phonemization_method
+        session_state.whisper_language = session_state.selected_whisper_language
+        session_state.espeak_language = session_state.selected_espeak_language
+
+
+def get_project_name(project):
+    return (
+        project if st.session_state.group == vc.EMPTY_GROUP_LABEL else project.replace(f"{st.session_state.group}/", "")
+    )

@@ -16,25 +16,7 @@
 # along with this program; if not, see: <http://www.gnu.org/licenses/>.
 #
 
-import logging
 import os
-from attest.ui.settings import get_settings
-
-
-_logger = None
-
-
-def get_logger():
-    global _logger
-    if _logger is None:
-        settings = get_settings()
-
-        logging.basicConfig(format="%(asctime)s %(levelname)s %(module)s: %(message)s")
-        logging_level = logging.getLevelName(settings.LOGGING_LEVEL)
-        _logger = logging.getLogger(__name__)
-        _logger.setLevel(logging_level)
-
-    return _logger
 
 
 def check_if_group(path):

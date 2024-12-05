@@ -24,6 +24,28 @@ from attest.src.model import (
     MetricResult,
     FeatureComparisonResult,
 )
+import attest.ui.constants as vc
+
+
+def parse_result(method, result):
+    """
+    General parser for result objects based on the session state method.
+
+    Args:
+        method: The method string from session state (e.g., "Evaluate", "Compare").
+        result: The result object to parse.
+
+    Returns:
+        Parsed result object of the appropriate UI result class.
+    """
+    if method == vc.EVALUATE_METHOD:
+        return UIEvaluationResult.parse(result)
+    elif method == vc.COMPARE_METHOD:
+        return UIComparisonResult.parse(result)
+    elif method == vc.COMPARE_MULTIPLE_METHOD:
+        return UIMultipleComparisonResult.parse(result)
+    else:
+        raise ValueError(f"Unsupported method: {method}")
 
 
 class MetricType(Enum):
